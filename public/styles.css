@@ -1,0 +1,138 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f7fa;
+  color: #333;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+}
+
+/* Form Section */
+.form-section {
+  background-color: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 570px;
+  margin: 10px;
+}
+
+.input-group {
+  margin-bottom: 20px;
+}
+
+label {
+  font-weight: bold;
+  margin: 10px 0;
+  display: block;
+}
+
+input[type='email'],
+input[type='password'],
+input[type='text'],
+select {
+  width: 100%;
+  max-width: 550px;
+  padding: 10px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+input[type='email']:focus,
+input[type='password']:focus,
+input[type='text']:focus {
+  border-color: #4caf50;
+  outline: none;
+}
+
+button,
+.verify-button {
+  width: 40%;
+  padding: 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+  border: none;
+}
+
+button {
+  margin-top: 10px;
+}
+
+.btn.primary,
+.verify-button {
+  background-color: #4caf50;
+  color: white;
+}
+
+.btn.primary:hover,
+.verify-button:hover {
+  background-color: #45a049;
+}
+
+.verify-button {
+  font-size: 14px;
+  width: 15%;
+}
+
+.auth-section {
+  width: 100%;
+  margin: 15px;
+}
+
+.auth-info {
+  margin-bottom: 15px;
+}
+
+.info-title {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+#userInfo,
+#accessToken {
+  background-color: #f9f9f9;
+  padding: 10px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  font-family: monospace;
+  word-wrap: break-word;
+  max-width: 50%;
+}
+
+.factor {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 5px;
+}
+
+#register-user-section,
+#forgot-password-section {
+  margin-top: 15px;
+}
+
+#show-register-user,
+#show-forgot-password {
+  color: #4caf50;
+  text-decoration: none;
+  font-size: 0.875rem;
+}
+
+#show-register-user:hover,
+#show-forgot-password:hover {
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.form-button-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}

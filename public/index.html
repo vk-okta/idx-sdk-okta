@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>IDX - Sample</title>
+
+    <script src="https://global.oktacdn.com/okta-auth-js/7.5.1/okta-auth-js.polyfill.js" type="text/javascript"></script>
+    <script src="https://global.oktacdn.com/okta-auth-js/7.5.1/okta-auth-js.min.js" type="text/javascript"></script>
+
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="sign-in-form" class="form-section">
+      <div class="input-group">
+        <label for="username">Username</label>
+        <input type="email" id="username" name="username" placeholder="Enter your email" />
+      </div>
+      <button onclick="signInUser()" class="btn primary">Sign In</button>
+
+      <div id="forgot-password-section">
+        <a id="show-forgot-password" onclick="showForgotPassword(event)">Forgot Password</a>
+      </div>
+
+      <div id="register-user-section">
+        <a id="show-register-user" onclick="showRegistrationForm(event)">Register New User</a>
+      </div>
+    </div>
+
+    <div id="forgot-password-form" class="form-section" style="display: none">
+      <div class="input-group">
+        <label for="forgot-pass-username">Username</label>
+        <input type="email" id="forgot-pass-username" name="forgot-pass-username" placeholder="Enter your email" />
+      </div>
+      <div class="form-button-section">
+        <button onclick="submitForgotPassword(event)" class="btn primary">Submit</button>
+        <button onclick="showSignInFormSection(event)" class="btn">Go Back</button>
+      </div>
+    </div>
+
+    <div id="register-new-user-form" class="form-section" style="display: none">
+      <label>Register New User</label>
+      <div class="input-group">
+        <label for="new-user-email">Email</label>
+        <input type="email" id="new-user-email" name="new-user-email" placeholder="Enter your Email" />
+      </div>
+      <div class="input-group">
+        <label for="new-user-fname">First Name</label>
+        <input type="text" id="new-user-fname" name="new-user-fname" placeholder="Enter your First Name" />
+      </div>
+      <div class="input-group">
+        <label for="new-user-lname">Last Name</label>
+        <input type="email" id="new-user-lname" name="new-user-lname" placeholder="Enter your Last Name" />
+      </div>
+      <div class="input-group">
+        <label for="new-user-password">Password</label>
+        <input type="password" id="new-user-password" name="new-user-password" placeholder="Enter your password" />
+      </div>
+      <div class="form-button-section">
+        <button onclick="submitRegisterNewUser(event)" class="btn primary">Submit</button>
+        <button onclick="showSignInFormSection(event)" class="btn">Go Back</button>
+      </div>
+    </div>
+
+    <div id="send-email-section" class="form-section" style="display: none">
+      <label>Send an email to get the passcode</label>
+      <button id="mfa-submit" onclick="submitMfa(event)" class="btn primary">Submit</button>
+    </div>
+
+    <div id="email-code-section" class="form-section" style="display: none">
+      <div class="input-group">
+        <label for="email-code">Enter the code:</label>
+        <input name="email-code" type="text" placeholder="Enter your code" />
+      </div>
+      <button id="mfa-submit" onclick="submitMfa(event)" class="btn primary">Submit</button>
+    </div>
+
+    <div id="send-sms-section" class="form-section" style="display: none">
+      <label>Send an sms to get the passcode</label>
+      <button id="mfa-submit" onclick="submitMfa(event)" class="btn primary">Submit</button>
+    </div>
+
+    <div id="sms-code-section" class="form-section" style="display: none">
+      <div class="input-group">
+        <label for="sms-code">Enter the code:</label>
+        <input name="sms-code" type="text" placeholder="Enter your code" />
+      </div>
+      <button id="mfa-submit" onclick="submitMfa(event)" class="btn primary">Submit</button>
+    </div>
+
+    <div id="password-section" class="form-section" style="display: none">
+      <div class="input-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" placeholder="Enter your password" />
+      </div>
+      <button id="mfa-submit" onclick="submitMfa(event)" class="btn primary">Submit</button>
+    </div>
+
+    <div id="security-question-section" class="form-section" style="display: none">
+      <div class="input-group">
+        <p>
+          <b class="sec-ques"><!-- questionText is set dynamically --></b>
+        </p>
+        <label for="sec-ques-ans" style="font-weight: 300">Answer:</label><br />
+        <input name="sec-ques-ans" type="text" autocomplete="off" /><br />
+      </div>
+      <button id="mfa-submit" onclick="submitMfa(event)" class="btn primary">Submit</button>
+    </div>
+
+    <div id="list-required-mfa-section" class="form-section" style="display: none">
+      <label>MFA is Required</label>
+      <!-- dynamically insert mfa list -->
+    </div>
+
+    <div id="list-enroll-mfa-section" class="form-section" style="display: none">
+      <label>Enroll in MFA</label>
+      <!-- dynamically insert mfa list -->
+    </div>
+
+    <div id="enroll-mfa-question-section" class="form-section" style="display: none">
+      <div class="input-group">
+        <label for="enroll-questions">Choose a question:</label>
+        <select name="enroll-questions">
+          <!-- questions are dynamically inserted here -->
+        </select>
+        <label for="enroll-answer">Answer:</label>
+        <input name="enroll-answer" type="text" autocomplete="off" />
+      </div>
+      <button id="mfa-submit" onclick="submitMfa(event)" class="btn primary">Submit</button>
+    </div>
+
+    <div id="auth-section" class="auth-section" style="display: none">
+      <button onclick="logOutUser()" class="btn primary logout" style="max-width: 250px; margin: 15px">Log Out</button>
+
+      <div class="auth-info">
+        <div class="info-title">User Info</div>
+        <div id="userInfo"></div>
+      </div>
+      <div class="auth-info">
+        <div class="info-title">Access Token</div>
+        <div id="accessToken"></div>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
