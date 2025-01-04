@@ -125,6 +125,31 @@
       <button id="mfa-submit" onclick="submitMfa(event)" class="btn primary">Submit</button>
     </div>
 
+    <div id="enroll-mfa-email-section" class="form-section" style="display: none">
+      <div class="input-group">
+        <label>Send an email to get the passcode</label>
+      </div>
+      <button id="mfa-submit" onclick="sendEmail(event)" class="btn primary">Send</button>
+    </div>
+    <div id="enroll-mfa-email-code-section" class="form-section" style="display: none">
+      <div class="input-group">
+        <label for="enroll-email-code">Enter the code:</label>
+        <input name="enroll-email-code" type="text" placeholder="Enter your code" />
+      </div>
+      <button id="mfa-submit" onclick="submitMfa(event)" class="btn primary">Submit</button>
+    </div>
+
+    <div id="enroll-mfa-password-section" class="form-section" style="display: none">
+      <div class="input-group">
+        <label for="enroll-password">Password</label>
+        <input type="password" id="enroll-password" name="enroll-password" placeholder="Enter your new password" />
+        <label for="enroll-password-cnf">Password</label>
+        <input type="password" id="enroll-password-cnf" name="enroll-password-cnf" placeholder="Re-Enter your password" />
+      </div>
+      <label style="color: red; display: none;" class="password-validation-error">Both the password doesn't match</label>
+      <button id="mfa-submit" onclick="submitMfa(event)" class="btn primary">Submit</button>
+    </div>
+
     <div id="auth-section" class="auth-section" style="display: none">
       <button onclick="logOutUser()" class="btn primary logout" style="max-width: 250px; margin: 15px">Log Out</button>
 

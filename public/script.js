@@ -12,8 +12,8 @@ var config = {
 authClient = new OktaAuth(config);
 
 function signInUser() {
-  // const username = document.getElementById('username').value;
-  const username = 'vivek.giri+testMFA@okta.com';
+  // const username = document.getElementById('username').value.trim();
+  const username = 'vivek.giri+newacc@okta.com';
 
   authClient.idx.authenticate({ username }).then(handleTransaction).catch(showError);
 }
@@ -109,6 +109,8 @@ function showMFA() {
         break;
       case 'enroll-authenticator':
         showMfaEnrollmentForm();
+        break;
+      case 'enroll-profile':
         break;
       default:
         throw new Error(`TODO: showMfa: handle nextStep: ${nextStep.name}`);
@@ -286,7 +288,16 @@ function showMfaEnrollmentForm() {
   const authenticator = appState.transaction.nextStep.authenticator;
 
   if (authenticator.type === 'security_question') {
+    // authenticator stores different questions that needs to be rendered
     return showEnrollSecurityQuestion(authenticator);
+  }
+
+  if (authenticator.type === 'email') {
+    return showEnrollEmail();
+  }
+
+  if (authenticator.type === 'password') {
+    return showEnrollPassword();
   }
 
   throw new Error(`TODO: handle enroll showMfaEnrollmentForm for authenticator type ${authenticator.type}`);
@@ -307,11 +318,27 @@ function showEnrollSecurityQuestion(authenticator) {
   });
 }
 
+function showEnrollEmail() {
+  document.getElementById('enroll-mfa-email-section').style.display = 'block';
+}
+
+function showEnrollPassword() {
+  document.getElementById('enroll-mfa-password-section').style.display = 'block';
+}
+
 function submitEnrollAuthenticator() {
   const authenticator = appState.transaction.nextStep.authenticator;
 
   if (authenticator.type === 'security_question') {
     return submitEnrollChallengeQuestion();
+  }
+
+  if (authenticator.type === 'email') {
+    return submitEnrollChallengeEmail();
+  }
+
+  if (authenticator.type === 'password') {
+    return submitEnrollChallengePassword();
   }
 
   throw new Error(`TODO: handle submit enrollment submitEnrollAuthenticator for authenticator type ${authenticator.type}`);
@@ -324,6 +351,41 @@ function submitEnrollChallengeQuestion() {
   const questionKey = document.querySelector('#enroll-mfa-question-section select[name=enroll-questions]').value;
 
   authClient.idx.authenticate({ credentials: { questionKey, answer } }).then(handleTransaction).catch(showError);
+}
+
+function sendEmail(event) {
+  document.getElementById('enroll-mfa-email-section').style.display = 'none';
+  document.getElementById('enroll-mfa-email-code-section').style.display = 'block';
+
+  const methodType = 'email';
+  authClient.idx.proceed({ methodType }).then(handleTransaction).catch(showError);
+  /* After sending this mail, the same type of response is returned
+  with next step as enroll-authenticator and type email
+  hence the same flow is repeated again and the send email card is still visible 
+  so the diplay none for that card doesn't works*/
+}
+
+function submitEnrollChallengeEmail() {
+  document.getElementById('enroll-mfa-email-code-section').style.display = 'none';
+  document.getElementById('enroll-mfa-email-section').style.display = 'none';
+
+  const passCode = document.querySelector('#enroll-mfa-email-code-section input[name=enroll-email-code]').value;
+
+  authClient.idx.proceed({ verificationCode: passCode }).then(handleTransaction).catch(showError);
+}
+
+function submitEnrollChallengePassword() {
+  document.getElementById('enroll-mfa-password-section').style.display = 'none';
+
+  const newPass = document.querySelector('#enroll-mfa-password-section input[name=enroll-password]').value;
+  const cnfNewPass = document.querySelector('#enroll-mfa-password-section input[name=enroll-password-cnf]').value;
+
+  if (newPass !== cnfNewPass) {
+    document.querySelector('#enroll-mfa-password-section password-validation-error').style.display = 'block';
+    return;
+  }
+
+  authClient.idx.proceed({ password: newPass }).then(handleTransaction).catch(showError);
 }
 
 // ======================================================== MFA REQUIRED ========================================================
@@ -387,11 +449,13 @@ function showSignInFormSection(e) {
 }
 
 function submitRegisterNewUser(e) {
+  document.getElementById('register-new-user-form').style.display = 'none';
+
   // const email = document.getElementById('new-user-email').value.trim();
   // const firstName = document.getElementById('new-user-fname').value.trim();
   // const lastName = document.getElementById('new-user-lname').value.trim();
 
-  const email = 'vivek.giri+newacc@gmail.com';
+  const email = 'vivek.giri+newacc@okta.com';
   const firstName = 'VK';
   const lastName = 'NewAcc';
 
