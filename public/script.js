@@ -262,13 +262,13 @@ function showMfaEnrollFactors() {
     const mfaVal = elem.value;
 
     const el = document.createElement('div');
-    el.setAttribute('id', `enroll-factor-${mfaLabel}`);
+    el.setAttribute('id', `enroll-factor-${mfaVal}`);
     el.setAttribute('class', `factor`);
 
     el.innerHTML = `
     <div class="factor">
       <span>${mfaLabel}</span>
-      <button class="verify-button" onclick="selectMfaFactorForEnrollment(event, '${mfaVal}')">Verify</a>
+      <button class="verify-button" onclick="selectMfaFactorForEnrollment(event, '${mfaVal}')">Verify</button>
     </div>
   `;
 
@@ -276,8 +276,17 @@ function showMfaEnrollFactors() {
   });
 }
 
+function hideMfaEnroll() {
+  const containerElement = document.getElementById('list-enroll-mfa-section');
+  containerElement.style.display = 'none';
+
+  // Clear only the dynamically inserted MFA factors (div elements retain the label)
+  const mfaElements = containerElement.querySelectorAll('.factor');
+  mfaElements.forEach((el) => el.remove());
+}
+
 function selectMfaFactorForEnrollment(e, authenticator) {
-  document.getElementById('list-enroll-mfa-section').style.display = 'none';
+  hideMfaEnroll();
 
   authClient.idx.authenticate({ authenticator }).then(handleTransaction).catch(showError);
 }
@@ -375,15 +384,15 @@ function submitEnrollChallengeEmail() {
 }
 
 function submitEnrollChallengePassword() {
-  document.getElementById('enroll-mfa-password-section').style.display = 'none';
-
   const newPass = document.querySelector('#enroll-mfa-password-section input[name=enroll-password]').value;
   const cnfNewPass = document.querySelector('#enroll-mfa-password-section input[name=enroll-password-cnf]').value;
 
   if (newPass !== cnfNewPass) {
-    document.querySelector('#enroll-mfa-password-section password-validation-error').style.display = 'block';
+    document.querySelector('#enroll-mfa-password-section .password-validation-error').style.display = 'block';
     return;
   }
+
+  document.getElementById('enroll-mfa-password-section').style.display = 'none';
 
   authClient.idx.proceed({ password: newPass }).then(handleTransaction).catch(showError);
 }
@@ -401,13 +410,13 @@ function showMfaRequired() {
     const mfaVal = elem.value;
 
     const el = document.createElement('div');
-    el.setAttribute('id', `verify-factor-${mfaLabel}`);
+    el.setAttribute('id', `verify-factor-${mfaVal}`);
     el.setAttribute('class', `factor`);
 
     el.innerHTML = `
     <div class="factor">
       <span>${mfaLabel}</span>
-      <button class="verify-button" onclick="selectMfaFactorForVerification(event, '${mfaVal}')">Verify</a>
+      <button class="verify-button" onclick="selectMfaFactorForVerification(event, '${mfaVal}')">Verify</button>
     </div>
   `;
 
@@ -415,8 +424,19 @@ function showMfaRequired() {
   });
 }
 
+function hideMfaReqList() {
+  // the dynamically inserted list of MFA needs to be cleared
+  const containerElement = document.getElementById('list-required-mfa-section');
+  containerElement.style.display = 'none';
+
+  // Clear only the dynamically inserted MFA factors (div elements retain the label)
+  const mfaElements = containerElement.querySelectorAll('.factor');
+  mfaElements.forEach((el) => el.remove());
+
+}
+
 function selectMfaFactorForVerification(e, authenticator) {
-  document.getElementById('list-required-mfa-section').style.display = 'none';
+  hideMfaReqList();
 
   authClient.idx.proceed({ authenticator }).then(handleTransaction).catch(showError);
 }
