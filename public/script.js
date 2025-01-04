@@ -390,19 +390,10 @@ function submitRegisterNewUser(e) {
   // const email = document.getElementById('new-user-email').value.trim();
   // const firstName = document.getElementById('new-user-fname').value.trim();
   // const lastName = document.getElementById('new-user-lname').value.trim();
-  // const password = document.getElementById('new-user-password').value.trim();
 
   const email = 'vivek.giri+newacc@gmail.com';
-  const firstName = 'new';
-  const lastName = 'account';
-  const password = 'Test@4321';
+  const firstName = 'VK';
+  const lastName = 'NewAcc';
 
-  authClient.idx
-    .register({
-      firstName,
-      lastName,
-      email,
-    })
-    .then(handleTransaction)
-    .catch(showError);
+  authClient.idx.register({ firstName, lastName, email }).then(handleTransaction).catch(showError);
 }
