@@ -24,10 +24,11 @@ function handleTransaction(transaction) {
   switch (transaction.status) {
     case 'PENDING':
       if (transaction.nextStep.name === 'identify') {
-        console.log('continue work');
+        console.log('identify step');
+        // renderDynamicSigninForm(transaction);
         break;
       }
-      
+
       hideSigninForm();
       updateAppState({ transaction });
       showMFA();
@@ -127,7 +128,10 @@ function showAuthenticatorVerificationData() {
   throw new Error(`TODO: handle authenticator-verification-data for authenticator type ${authenticator.type}`);
 }
 function showAuthenticatorVerificationDataEmailAndPhone() {
-  const options = appState.transaction.nextStep.inputs[0].options.value;
+  const options = appState.transaction.nextStep.inputs[0].options[0].value;
+
+  // TODO: Make a list from this options
+  // console.log(options);
 }
 
 function submitMfa() {
@@ -367,10 +371,7 @@ function submitForgotPassword(e) {
 
   document.getElementById('forgot-password-form').style.display = 'none';
 
-  authClient.idx
-    .recoverPassword({ username, authenticators: ['okta_email'] })
-    .then(handleTransaction)
-    .catch(showError);
+  authClient.idx.recoverPassword({ username }).then(handleTransaction).catch(showError);
 }
 
 // ===================================================== REGISTER NEW USER =====================================================
