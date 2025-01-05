@@ -14,6 +14,8 @@ authClient = new OktaAuth(config);
 function signInUser() {
   const username = document.getElementById('username').value.trim();
 
+  updateAppState({ username });
+
   authClient.idx.authenticate({ username }).then(handleTransaction).catch(showError);
 }
 
@@ -548,8 +550,9 @@ function showForgotPassword(e) {
 }
 
 function submitForgotPassword(e) {
-  // const username = document.getElementById('forgot-pass-username').value.trim();
-  const username = 'vivek.giri+testMFA@okta.com';
+  const username = document.getElementById('forgot-pass-username').value.trim();
+
+  updateAppState({ username });
 
   document.getElementById('forgot-password-form').style.display = 'none';
 
@@ -571,13 +574,9 @@ function showSignInFormSection(e) {
 function submitRegisterNewUser(e) {
   document.getElementById('register-new-user-form').style.display = 'none';
 
-  // const email = document.getElementById('new-user-email').value.trim();
-  // const firstName = document.getElementById('new-user-fname').value.trim();
-  // const lastName = document.getElementById('new-user-lname').value.trim();
-
-  const email = 'vivek.giri+newacc@okta.com';
-  const firstName = 'VK';
-  const lastName = 'NewAcc';
+  const email = document.getElementById('new-user-email').value.trim();
+  const firstName = document.getElementById('new-user-fname').value.trim();
+  const lastName = document.getElementById('new-user-lname').value.trim();
 
   updateAppState({ username: email });
 
