@@ -19,6 +19,7 @@ function signInUser() {
 
 function renderDynamicSigninForm(transaction) {
   document.getElementById('dynamic-signin-form-section').style.display = 'block';
+  hideSigninForm();
 
   const inputs = transaction.nextStep.inputs;
 
@@ -100,6 +101,7 @@ function stringify(obj) {
 
 function updateAppState(props) {
   Object.assign(appState, props);
+  document.getElementById('appState-section').innerText = stringify(appState);
 }
 
 function hideSigninForm() {
