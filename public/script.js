@@ -17,14 +17,47 @@ function signInUser() {
   authClient.idx.authenticate({ username }).then(handleTransaction).catch(showError);
 }
 
+function renderDynamicSigninForm(transaction) {
+  document.getElementById('dynamic-signin-form-section').style.display = 'block';
+
+  const inputs = transaction.nextStep.inputs;
+
+  // set the display to block of all the sections present in the inputs array
+  if (inputs.some((input) => input.name === 'username')) {
+    document.querySelector('#dynamic-signin-form-section .dynamic-username-group').style.display = 'block';
+  }
+
+  submitDynamicFormAuto();
+}
+
+function submitDynamicFormAuto() {
+  // FIXME: Ideally imo the identify-step should not be there
+  // here I am using the username stored in the appstate
+  const storedUsername = appState.username;
+
+  if (!storedUsername) return;
+
+  console.log('Using username stored in the appstate -> ', storedUsername);
+
+  // submit the form with the stored username
+  submitDynamicSigninForm(storedUsername);
+}
+
+function submitDynamicSigninForm(storedUser) {
+  document.getElementById('dynamic-signin-form-section').style.display = 'none';
+
+  const username = storedUser ? storedUser : document.querySelector('#dynamic-signin-form-section input[name=username]').value.trim();
+
+  return authClient.idx.proceed({ username }).then(handleTransaction).catch(showError);
+}
+
 function handleTransaction(transaction) {
   console.log(transaction);
 
   switch (transaction.status) {
     case 'PENDING':
       if (transaction.nextStep.name === 'identify') {
-        console.log('identify step');
-        // renderDynamicSigninForm(transaction);
+        renderDynamicSigninForm(transaction);
         break;
       }
 
@@ -544,10 +577,11 @@ function submitRegisterNewUser(e) {
   const firstName = 'VK';
   const lastName = 'NewAcc';
 
+  updateAppState({ username: email });
+
   authClient.idx.register({ firstName, lastName, email }).then(handleTransaction).catch(showError);
 }
 
-
-// TODO: if the next step has canSkip as true, we can skip that MFA step 
+// TODO: if the next step has canSkip as true, we can skip that MFA step
 // by passing the skip: true in idx.proceed
 // https://developer.okta.com/docs/guides/oie-embedded-sdk-use-case-self-reg/nodejs/main/#the-user-skips-the-phone-authenticator
