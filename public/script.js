@@ -39,7 +39,7 @@ function handleTransaction(transaction) {
       setTokens(transaction.tokens);
       break;
     default:
-      throw new Error('TODO: add handling for ' + transaction.status + ' status');
+      throw new Error('MORE WORK: add handling for ' + transaction.status + ' status');
   }
 }
 
@@ -117,7 +117,7 @@ function showMFA() {
         showMfaEnrollPollForm();
         break;
       default:
-        throw new Error(`TODO: showMfa: handle nextStep: ${nextStep.name}`);
+        throw new Error(`MORE WORK: showMfa: handle nextStep: ${nextStep.name}`);
     }
   }
 }
@@ -131,7 +131,7 @@ function showAuthenticatorVerificationData() {
     return showAuthenticatorVerificationDataEmailAndPhone();
   }
 
-  throw new Error(`TODO: handle authenticator-verification-data for authenticator type ${authenticator.type}`);
+  throw new Error(`MORE WORK: handle authenticator-verification-data for authenticator type ${authenticator.type}`);
 }
 function showAuthenticatorVerificationDataEmailAndPhone() {
   const options = appState.transaction.nextStep.inputs[0].options[0].value;
@@ -160,7 +160,7 @@ function submitMfa() {
     return submitEnrollPoll();
   }
 
-  throw new Error(`TODO: submitMfa: handle submit for nextStep: ${nextStep.name}`);
+  throw new Error(`MORE WORK: submitMfa: handle submit for nextStep: ${nextStep.name}`);
 }
 
 // this is used to send the email to the user
@@ -170,7 +170,7 @@ function submitAuthenticatorVerificationData() {
   if (authenticator.type === 'email') {
     return submitAuthenticatorVerificationDataEmail();
   }
-  throw new Error(`TODO: handle submit authenticator-verification-data for authenticator type ${authenticator.type}`);
+  throw new Error(`MORE WORK: handle submit authenticator-verification-data for authenticator type ${authenticator.type}`);
 }
 function submitAuthenticatorVerificationDataEmail() {
   document.getElementById('send-email-section').style.display = 'none';
@@ -274,10 +274,10 @@ function submitChallengeAuthenticator() {
     // if okta verify is of type code
     if (oktaVerifyType === 'verificationCode') return submitChallengeAppCode();
 
-    throw new Error(`TODO: handle submit okta verify type for ${oktaVerifyType}`);
+    throw new Error(`MORE WORK: handle submit okta verify type for ${oktaVerifyType}`);
   }
 
-  throw new Error(`TODO: handle submit challenge-authenticator for authenticator type ${authenticator.type}`);
+  throw new Error(`MORE WORK: handle submit challenge-authenticator for authenticator type ${authenticator.type}`);
 }
 function submitChallengeEmail() {
   document.getElementById('email-code-section').style.display = 'none';
@@ -376,7 +376,7 @@ function showMfaEnrollmentForm() {
     return showEnrollPassword();
   }
 
-  throw new Error(`TODO: handle enroll showMfaEnrollmentForm for authenticator type ${authenticator.type}`);
+  throw new Error(`MORE WORK: handle enroll showMfaEnrollmentForm for authenticator type ${authenticator.type}`);
 }
 
 function showEnrollSecurityQuestion(authenticator) {
@@ -417,7 +417,7 @@ function submitEnrollAuthenticator() {
     return submitEnrollChallengePassword();
   }
 
-  throw new Error(`TODO: handle submit enrollment submitEnrollAuthenticator for authenticator type ${authenticator.type}`);
+  throw new Error(`MORE WORK: handle submit enrollment submitEnrollAuthenticator for authenticator type ${authenticator.type}`);
 }
 
 function submitEnrollChallengeQuestion() {
