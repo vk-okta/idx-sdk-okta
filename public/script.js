@@ -111,6 +111,10 @@ function showMFA() {
         showMfaEnrollmentForm();
         break;
       case 'enroll-profile':
+        console.log('more work needed in enroll profile');
+        break;
+      case 'enroll-poll':
+        showMfaEnrollPollForm();
         break;
       default:
         throw new Error(`TODO: showMfa: handle nextStep: ${nextStep.name}`);
@@ -150,6 +154,10 @@ function submitMfa() {
 
   if (nextStep.name === 'enroll-authenticator') {
     return submitEnrollAuthenticator();
+  }
+
+  if (nextStep.name === 'enroll-poll') {
+    return submitEnrollPoll();
   }
 
   throw new Error(`TODO: submitMfa: handle submit for nextStep: ${nextStep.name}`);
@@ -195,6 +203,48 @@ function showMfaChallenge() {
     const questionText = appState.transaction.nextStep.authenticator.profile.question;
     document.querySelector('#security-question-section .sec-ques').innerText = questionText;
   }
+
+  // OKTA-VERIFY
+  if (authenticator.type === 'app') {
+    document.getElementById('okta-verify-passcode-section').style.display = 'block';
+  }
+}
+
+function showMfaEnrollPollForm() {
+  const authenticator = appState.transaction.nextStep.authenticator;
+  // extract QR code data
+  const qrCode = authenticator.contextualData.qrcode;
+
+  const containerElem = document.getElementById('enroll-okta-verify-section');
+  containerElem.style.display = 'block';
+
+  const imgFrame = document.querySelector('#enroll-okta-verify-section .enroll-qrcode-image');
+  imgFrame.innerHTML = '';
+
+  const img = document.createElement('img');
+  img.setAttribute('src', qrCode.href);
+  imgFrame.appendChild(img);
+}
+
+function hideEnrollPoll() {
+  // hide the enroll card
+  const containerElem = document.getElementById('enroll-okta-verify-section');
+  containerElem.style.display = 'none';
+
+  // remove the image frame
+  const imgFrame = document.querySelector('#enroll-okta-verify-section .enroll-qrcode-image');
+  imgFrame.innerHTML = '';
+}
+
+function submitEnrollPoll() {
+  hideEnrollPoll();
+
+  // TODO: once the code is scanned, the Okta verify authenticator is set for the user
+  // but nothing changes, in Okta Hosted widget....scanning the qr code takes you to the next page automatically
+  // but in here, nothing changes...calling proceed after scanning returns the same response as earlier
+  // effectively showing the same card
+
+  authClient.idx.proceed({ verificationCode: passCode }).then(handleTransaction).catch(showError);
 }
 
 // ================================================= SUBMIT CHALLENGE AUTHENTICATOR =================================================
@@ -215,6 +265,10 @@ function submitChallengeAuthenticator() {
 
   if (authenticator.type === 'security_question') {
     return submitChallengeQuestion();
+  }
+
+  if (authenticator.type === 'app') {
+    return submitChallengeApp();
   }
 
   throw new Error(`TODO: handle submit challenge-authenticator for authenticator type ${authenticator.type}`);
@@ -246,7 +300,14 @@ function submitChallengeQuestion() {
   const answer = document.querySelector('#security-question-section input[name=sec-ques-ans]').value;
 
   const questionKey = appState.transaction.nextStep.authenticator.profile.questionKey;
-  authClient.idx.authenticate({ credentials: { questionKey, answer } }).then(handleTransaction).catch(showError);
+  authClient.idx.proceed({ credentials: { questionKey, answer } }).then(handleTransaction).catch(showError);
+}
+function submitChallengeApp() {
+  document.getElementById('okta-verify-passcode-section').style.display = 'none';
+
+  const passCode = document.querySelector('#okta-verify-passcode-section input[name=okta-verify-passcode]').value;
+
+  authClient.idx.proceed({ verificationCode: passCode }).then(handleTransaction).catch(showError);
 }
 
 // ======================================================== ENROLL MFA FACTORS LIST ========================================================
@@ -432,7 +493,6 @@ function hideMfaReqList() {
   // Clear only the dynamically inserted MFA factors (div elements retain the label)
   const mfaElements = containerElement.querySelectorAll('.factor');
   mfaElements.forEach((el) => el.remove());
-
 }
 
 function selectMfaFactorForVerification(e, authenticator) {

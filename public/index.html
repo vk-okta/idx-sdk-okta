@@ -103,6 +103,14 @@
       <button id="mfa-submit" onclick="submitMfa(event)" class="btn primary">Submit</button>
     </div>
 
+    <div id="okta-verify-passcode-section" class="form-section" style="display: none">
+      <div class="input-group">
+        <label for="okta-verify-passcode">Enter the code from the app:</label>
+        <input name="okta-verify-passcode" type="text" autocomplete="off" />
+      </div>
+      <button id="mfa-submit" onclick="submitMfa(event)" class="btn primary">Submit</button>
+    </div>
+
     <div id="list-required-mfa-section" class="form-section" style="display: none">
       <label>MFA is Required</label>
       <!-- dynamically insert mfa list -->
@@ -143,11 +151,20 @@
       <div class="input-group">
         <label for="enroll-password">Password</label>
         <input type="password" id="enroll-password" name="enroll-password" placeholder="Enter your new password" />
-        <label for="enroll-password-cnf">Password</label>
-        <input type="password" id="enroll-password-cnf" name="enroll-password-cnf" placeholder="Re-Enter your password" />
+        <label for="enroll-password-cnf">Re-enter Password</label>
+        <input type="password" id="enroll-password-cnf" name="enroll-password-cnf" placeholder="Re-enter your password" />
       </div>
-      <label style="color: red; display: none;" class="password-validation-error">Both the password doesn't match</label>
+      <label style="color: red; display: none" class="password-validation-error">Both the password doesn't match</label>
       <button id="mfa-submit" onclick="submitMfa(event)" class="btn primary">Submit</button>
+    </div>
+
+    <div id="enroll-okta-verify-section" class="form-section" style="display: none">
+      <div class="input-group">
+        <label for="enroll-qrcode-image">Open the Okta Verify app and scan this QR code</label>
+        <div name="enroll-qrcode-image" class="enroll-qrcode-image">
+          <!-- image is appended dynamically-->
+        </div>
+      </div>
     </div>
 
     <div id="auth-section" class="auth-section" style="display: none">
