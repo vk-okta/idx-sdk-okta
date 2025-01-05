@@ -12,8 +12,7 @@ var config = {
 authClient = new OktaAuth(config);
 
 function signInUser() {
-  // const username = document.getElementById('username').value.trim();
-  const username = 'vivek.giri+newacc@okta.com';
+  const username = document.getElementById('username').value.trim();
 
   authClient.idx.authenticate({ username }).then(handleTransaction).catch(showError);
 }
@@ -547,3 +546,8 @@ function submitRegisterNewUser(e) {
 
   authClient.idx.register({ firstName, lastName, email }).then(handleTransaction).catch(showError);
 }
+
+
+// TODO: if the next step has canSkip as true, we can skip that MFA step 
+// by passing the skip: true in idx.proceed
+// https://developer.okta.com/docs/guides/oie-embedded-sdk-use-case-self-reg/nodejs/main/#the-user-skips-the-phone-authenticator
