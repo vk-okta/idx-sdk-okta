@@ -12,8 +12,8 @@ var config = {
 authClient = new OktaAuth(config);
 
 function signInUser() {
-  // const username = document.getElementById('username').value;
-  const username = 'vivek.giri+testMFA@okta.com';
+  // const username = document.getElementById('username').value.trim();
+  const username = 'vivek.giri+newacc@okta.com';
 
   authClient.idx.authenticate({ username }).then(handleTransaction).catch(showError);
 }
@@ -39,7 +39,7 @@ function handleTransaction(transaction) {
       setTokens(transaction.tokens);
       break;
     default:
-      throw new Error('TODO: add handling for ' + transaction.status + ' status');
+      throw new Error('MORE WORK: add handling for ' + transaction.status + ' status');
   }
 }
 
@@ -110,8 +110,14 @@ function showMFA() {
       case 'enroll-authenticator':
         showMfaEnrollmentForm();
         break;
+      case 'enroll-profile':
+        console.log('more work needed in enroll profile');
+        break;
+      case 'enroll-poll':
+        showMfaEnrollPollForm();
+        break;
       default:
-        throw new Error(`TODO: showMfa: handle nextStep: ${nextStep.name}`);
+        throw new Error(`MORE WORK: showMfa: handle nextStep: ${nextStep.name}`);
     }
   }
 }
@@ -125,7 +131,7 @@ function showAuthenticatorVerificationData() {
     return showAuthenticatorVerificationDataEmailAndPhone();
   }
 
-  throw new Error(`TODO: handle authenticator-verification-data for authenticator type ${authenticator.type}`);
+  throw new Error(`MORE WORK: handle authenticator-verification-data for authenticator type ${authenticator.type}`);
 }
 function showAuthenticatorVerificationDataEmailAndPhone() {
   const options = appState.transaction.nextStep.inputs[0].options[0].value;
@@ -150,7 +156,11 @@ function submitMfa() {
     return submitEnrollAuthenticator();
   }
 
-  throw new Error(`TODO: submitMfa: handle submit for nextStep: ${nextStep.name}`);
+  if (nextStep.name === 'enroll-poll') {
+    return submitEnrollPoll();
+  }
+
+  throw new Error(`MORE WORK: submitMfa: handle submit for nextStep: ${nextStep.name}`);
 }
 
 // this is used to send the email to the user
@@ -160,7 +170,7 @@ function submitAuthenticatorVerificationData() {
   if (authenticator.type === 'email') {
     return submitAuthenticatorVerificationDataEmail();
   }
-  throw new Error(`TODO: handle submit authenticator-verification-data for authenticator type ${authenticator.type}`);
+  throw new Error(`MORE WORK: handle submit authenticator-verification-data for authenticator type ${authenticator.type}`);
 }
 function submitAuthenticatorVerificationDataEmail() {
   document.getElementById('send-email-section').style.display = 'none';
@@ -193,6 +203,48 @@ function showMfaChallenge() {
     const questionText = appState.transaction.nextStep.authenticator.profile.question;
     document.querySelector('#security-question-section .sec-ques').innerText = questionText;
   }
+
+  // OKTA-VERIFY
+  if (authenticator.type === 'app') {
+    document.getElementById('okta-verify-passcode-section').style.display = 'block';
+  }
+}
+
+function showMfaEnrollPollForm() {
+  const authenticator = appState.transaction.nextStep.authenticator;
+  // extract QR code data
+  const qrCode = authenticator.contextualData.qrcode;
+
+  const containerElem = document.getElementById('enroll-okta-verify-section');
+  containerElem.style.display = 'block';
+
+  const imgFrame = document.querySelector('#enroll-okta-verify-section .enroll-qrcode-image');
+  imgFrame.innerHTML = '';
+
+  const img = document.createElement('img');
+  img.setAttribute('src', qrCode.href);
+  imgFrame.appendChild(img);
+}
+
+function hideEnrollPoll() {
+  // hide the enroll card
+  const containerElem = document.getElementById('enroll-okta-verify-section');
+  containerElem.style.display = 'none';
+
+  // remove the image frame
+  const imgFrame = document.querySelector('#enroll-okta-verify-section .enroll-qrcode-image');
+  imgFrame.innerHTML = '';
+}
+
+function submitEnrollPoll() {
+  hideEnrollPoll();
+
+  // TODO: once the code is scanned, the Okta verify authenticator is set for the user
+  // but nothing changes, in Okta Hosted widget....scanning the qr code takes you to the next page automatically
+  // but in here, nothing changes...calling proceed after scanning returns the same response as earlier
+  // effectively showing the same card
+
+  authClient.idx.proceed({ verificationCode: passCode }).then(handleTransaction).catch(showError);
 }
 
 // ================================================= SUBMIT CHALLENGE AUTHENTICATOR =================================================
@@ -215,7 +267,17 @@ function submitChallengeAuthenticator() {
     return submitChallengeQuestion();
   }
 
-  throw new Error(`TODO: handle submit challenge-authenticator for authenticator type ${authenticator.type}`);
+  if (authenticator.type === 'app') {
+    // Okta verify can be of type push or code
+    const oktaVerifyType = appState.transaction.nextStep.inputs[0].name;
+
+    // if okta verify is of type code
+    if (oktaVerifyType === 'verificationCode') return submitChallengeAppCode();
+
+    throw new Error(`MORE WORK: handle submit okta verify type for ${oktaVerifyType}`);
+  }
+
+  throw new Error(`MORE WORK: handle submit challenge-authenticator for authenticator type ${authenticator.type}`);
 }
 function submitChallengeEmail() {
   document.getElementById('email-code-section').style.display = 'none';
@@ -244,7 +306,14 @@ function submitChallengeQuestion() {
   const answer = document.querySelector('#security-question-section input[name=sec-ques-ans]').value;
 
   const questionKey = appState.transaction.nextStep.authenticator.profile.questionKey;
-  authClient.idx.authenticate({ credentials: { questionKey, answer } }).then(handleTransaction).catch(showError);
+  authClient.idx.proceed({ credentials: { questionKey, answer } }).then(handleTransaction).catch(showError);
+}
+function submitChallengeAppCode() {
+  document.getElementById('okta-verify-passcode-section').style.display = 'none';
+
+  const passCode = document.querySelector('#okta-verify-passcode-section input[name=okta-verify-passcode]').value;
+
+  authClient.idx.proceed({ verificationCode: passCode }).then(handleTransaction).catch(showError);
 }
 
 // ======================================================== ENROLL MFA FACTORS LIST ========================================================
@@ -260,13 +329,13 @@ function showMfaEnrollFactors() {
     const mfaVal = elem.value;
 
     const el = document.createElement('div');
-    el.setAttribute('id', `enroll-factor-${mfaLabel}`);
+    el.setAttribute('id', `enroll-factor-${mfaVal}`);
     el.setAttribute('class', `factor`);
 
     el.innerHTML = `
     <div class="factor">
       <span>${mfaLabel}</span>
-      <button class="verify-button" onclick="selectMfaFactorForEnrollment(event, '${mfaVal}')">Verify</a>
+      <button class="verify-button" onclick="selectMfaFactorForEnrollment(event, '${mfaVal}')">Verify</button>
     </div>
   `;
 
@@ -274,8 +343,17 @@ function showMfaEnrollFactors() {
   });
 }
 
+function hideMfaEnroll() {
+  const containerElement = document.getElementById('list-enroll-mfa-section');
+  containerElement.style.display = 'none';
+
+  // Clear only the dynamically inserted MFA factors (div elements retain the label)
+  const mfaElements = containerElement.querySelectorAll('.factor');
+  mfaElements.forEach((el) => el.remove());
+}
+
 function selectMfaFactorForEnrollment(e, authenticator) {
-  document.getElementById('list-enroll-mfa-section').style.display = 'none';
+  hideMfaEnroll();
 
   authClient.idx.authenticate({ authenticator }).then(handleTransaction).catch(showError);
 }
@@ -286,10 +364,19 @@ function showMfaEnrollmentForm() {
   const authenticator = appState.transaction.nextStep.authenticator;
 
   if (authenticator.type === 'security_question') {
+    // authenticator stores different questions that needs to be rendered
     return showEnrollSecurityQuestion(authenticator);
   }
 
-  throw new Error(`TODO: handle enroll showMfaEnrollmentForm for authenticator type ${authenticator.type}`);
+  if (authenticator.type === 'email') {
+    return showEnrollEmail();
+  }
+
+  if (authenticator.type === 'password') {
+    return showEnrollPassword();
+  }
+
+  throw new Error(`MORE WORK: handle enroll showMfaEnrollmentForm for authenticator type ${authenticator.type}`);
 }
 
 function showEnrollSecurityQuestion(authenticator) {
@@ -307,6 +394,14 @@ function showEnrollSecurityQuestion(authenticator) {
   });
 }
 
+function showEnrollEmail() {
+  document.getElementById('enroll-mfa-email-section').style.display = 'block';
+}
+
+function showEnrollPassword() {
+  document.getElementById('enroll-mfa-password-section').style.display = 'block';
+}
+
 function submitEnrollAuthenticator() {
   const authenticator = appState.transaction.nextStep.authenticator;
 
@@ -314,7 +409,15 @@ function submitEnrollAuthenticator() {
     return submitEnrollChallengeQuestion();
   }
 
-  throw new Error(`TODO: handle submit enrollment submitEnrollAuthenticator for authenticator type ${authenticator.type}`);
+  if (authenticator.type === 'email') {
+    return submitEnrollChallengeEmail();
+  }
+
+  if (authenticator.type === 'password') {
+    return submitEnrollChallengePassword();
+  }
+
+  throw new Error(`MORE WORK: handle submit enrollment submitEnrollAuthenticator for authenticator type ${authenticator.type}`);
 }
 
 function submitEnrollChallengeQuestion() {
@@ -324,6 +427,41 @@ function submitEnrollChallengeQuestion() {
   const questionKey = document.querySelector('#enroll-mfa-question-section select[name=enroll-questions]').value;
 
   authClient.idx.authenticate({ credentials: { questionKey, answer } }).then(handleTransaction).catch(showError);
+}
+
+function sendEmail(event) {
+  document.getElementById('enroll-mfa-email-section').style.display = 'none';
+  document.getElementById('enroll-mfa-email-code-section').style.display = 'block';
+
+  const methodType = 'email';
+  authClient.idx.proceed({ methodType }).then(handleTransaction).catch(showError);
+  /* TODO: After sending this mail, the same type of response is returned
+  with next step as enroll-authenticator and type email
+  hence the same flow is repeated again and the send email card is still visible 
+  so the diplay none for that card doesn't works*/
+}
+
+function submitEnrollChallengeEmail() {
+  document.getElementById('enroll-mfa-email-code-section').style.display = 'none';
+  document.getElementById('enroll-mfa-email-section').style.display = 'none';
+
+  const passCode = document.querySelector('#enroll-mfa-email-code-section input[name=enroll-email-code]').value;
+
+  authClient.idx.proceed({ verificationCode: passCode }).then(handleTransaction).catch(showError);
+}
+
+function submitEnrollChallengePassword() {
+  const newPass = document.querySelector('#enroll-mfa-password-section input[name=enroll-password]').value;
+  const cnfNewPass = document.querySelector('#enroll-mfa-password-section input[name=enroll-password-cnf]').value;
+
+  if (newPass !== cnfNewPass) {
+    document.querySelector('#enroll-mfa-password-section .password-validation-error').style.display = 'block';
+    return;
+  }
+
+  document.getElementById('enroll-mfa-password-section').style.display = 'none';
+
+  authClient.idx.proceed({ password: newPass }).then(handleTransaction).catch(showError);
 }
 
 // ======================================================== MFA REQUIRED ========================================================
@@ -339,13 +477,13 @@ function showMfaRequired() {
     const mfaVal = elem.value;
 
     const el = document.createElement('div');
-    el.setAttribute('id', `verify-factor-${mfaLabel}`);
+    el.setAttribute('id', `verify-factor-${mfaVal}`);
     el.setAttribute('class', `factor`);
 
     el.innerHTML = `
     <div class="factor">
       <span>${mfaLabel}</span>
-      <button class="verify-button" onclick="selectMfaFactorForVerification(event, '${mfaVal}')">Verify</a>
+      <button class="verify-button" onclick="selectMfaFactorForVerification(event, '${mfaVal}')">Verify</button>
     </div>
   `;
 
@@ -353,8 +491,18 @@ function showMfaRequired() {
   });
 }
 
+function hideMfaReqList() {
+  // the dynamically inserted list of MFA needs to be cleared
+  const containerElement = document.getElementById('list-required-mfa-section');
+  containerElement.style.display = 'none';
+
+  // Clear only the dynamically inserted MFA factors (div elements retain the label)
+  const mfaElements = containerElement.querySelectorAll('.factor');
+  mfaElements.forEach((el) => el.remove());
+}
+
 function selectMfaFactorForVerification(e, authenticator) {
-  document.getElementById('list-required-mfa-section').style.display = 'none';
+  hideMfaReqList();
 
   authClient.idx.proceed({ authenticator }).then(handleTransaction).catch(showError);
 }
@@ -387,22 +535,15 @@ function showSignInFormSection(e) {
 }
 
 function submitRegisterNewUser(e) {
+  document.getElementById('register-new-user-form').style.display = 'none';
+
   // const email = document.getElementById('new-user-email').value.trim();
   // const firstName = document.getElementById('new-user-fname').value.trim();
   // const lastName = document.getElementById('new-user-lname').value.trim();
-  // const password = document.getElementById('new-user-password').value.trim();
 
-  const email = 'vivek.giri+newacc@gmail.com';
-  const firstName = 'new';
-  const lastName = 'account';
-  const password = 'Test@4321';
+  const email = 'vivek.giri+newacc@okta.com';
+  const firstName = 'VK';
+  const lastName = 'NewAcc';
 
-  authClient.idx
-    .register({
-      firstName,
-      lastName,
-      email,
-    })
-    .then(handleTransaction)
-    .catch(showError);
+  authClient.idx.register({ firstName, lastName, email }).then(handleTransaction).catch(showError);
 }
