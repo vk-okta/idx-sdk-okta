@@ -268,7 +268,13 @@ function submitChallengeAuthenticator() {
   }
 
   if (authenticator.type === 'app') {
-    return submitChallengeApp();
+    // Okta verify can be of type push or code
+    const oktaVerifyType = appState.transaction.nextStep.inputs[0].name;
+
+    // if okta verify is of type code
+    if (oktaVerifyType === 'verificationCode') return submitChallengeAppCode();
+
+    throw new Error(`TODO: handle submit okta verify type for ${oktaVerifyType}`);
   }
 
   throw new Error(`TODO: handle submit challenge-authenticator for authenticator type ${authenticator.type}`);
@@ -302,7 +308,7 @@ function submitChallengeQuestion() {
   const questionKey = appState.transaction.nextStep.authenticator.profile.questionKey;
   authClient.idx.proceed({ credentials: { questionKey, answer } }).then(handleTransaction).catch(showError);
 }
-function submitChallengeApp() {
+function submitChallengeAppCode() {
   document.getElementById('okta-verify-passcode-section').style.display = 'none';
 
   const passCode = document.querySelector('#okta-verify-passcode-section input[name=okta-verify-passcode]').value;
@@ -429,7 +435,7 @@ function sendEmail(event) {
 
   const methodType = 'email';
   authClient.idx.proceed({ methodType }).then(handleTransaction).catch(showError);
-  /* After sending this mail, the same type of response is returned
+  /* TODO: After sending this mail, the same type of response is returned
   with next step as enroll-authenticator and type email
   hence the same flow is repeated again and the send email card is still visible 
   so the diplay none for that card doesn't works*/
