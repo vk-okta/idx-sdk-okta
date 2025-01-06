@@ -12,10 +12,46 @@ var config = {
 authClient = new OktaAuth(config);
 
 function signInUser() {
-  // const username = document.getElementById('username').value.trim();
-  const username = 'vivek.giri+newacc@okta.com';
+  const username = document.getElementById('username').value.trim();
+
+  updateAppState({ username });
 
   authClient.idx.authenticate({ username }).then(handleTransaction).catch(showError);
+}
+
+function renderDynamicSigninForm(transaction) {
+  document.getElementById('dynamic-signin-form-section').style.display = 'block';
+  hideSigninForm();
+
+  const inputs = transaction.nextStep.inputs;
+
+  // set the display to block of all the sections present in the inputs array
+  if (inputs.some((input) => input.name === 'username')) {
+    document.querySelector('#dynamic-signin-form-section .dynamic-username-group').style.display = 'block';
+  }
+
+  submitDynamicFormAuto();
+}
+
+function submitDynamicFormAuto() {
+  // FIXME: Ideally imo the identify-step should not be there
+  // here I am using the username stored in the appstate
+  const storedUsername = appState.username;
+
+  if (!storedUsername) return;
+
+  console.log('Using username stored in the appstate to skip the identify-step');
+
+  // submit the form with the stored username
+  submitDynamicSigninForm(storedUsername);
+}
+
+function submitDynamicSigninForm(storedUser) {
+  document.getElementById('dynamic-signin-form-section').style.display = 'none';
+
+  const username = storedUser ? storedUser : document.querySelector('#dynamic-signin-form-section input[name=username]').value.trim();
+
+  return authClient.idx.proceed({ username }).then(handleTransaction).catch(showError);
 }
 
 function handleTransaction(transaction) {
@@ -24,8 +60,7 @@ function handleTransaction(transaction) {
   switch (transaction.status) {
     case 'PENDING':
       if (transaction.nextStep.name === 'identify') {
-        console.log('identify step');
-        // renderDynamicSigninForm(transaction);
+        renderDynamicSigninForm(transaction);
         break;
       }
 
@@ -68,6 +103,7 @@ function stringify(obj) {
 
 function updateAppState(props) {
   Object.assign(appState, props);
+  document.getElementById('appState-section').innerText = stringify(appState);
 }
 
 function hideSigninForm() {
@@ -111,7 +147,7 @@ function showMFA() {
         showMfaEnrollmentForm();
         break;
       case 'enroll-profile':
-        console.log('more work needed in enroll profile');
+        showRegistrationForm();
         break;
       case 'enroll-poll':
         showMfaEnrollPollForm();
@@ -515,7 +551,9 @@ function showForgotPassword(e) {
 
 function submitForgotPassword(e) {
   // const username = document.getElementById('forgot-pass-username').value.trim();
-  const username = 'vivek.giri+testMFA@okta.com';
+  const username = 'vivek.giri+newacc@okta.com';
+
+  updateAppState({ username });
 
   document.getElementById('forgot-password-form').style.display = 'none';
 
@@ -537,13 +575,15 @@ function showSignInFormSection(e) {
 function submitRegisterNewUser(e) {
   document.getElementById('register-new-user-form').style.display = 'none';
 
-  // const email = document.getElementById('new-user-email').value.trim();
-  // const firstName = document.getElementById('new-user-fname').value.trim();
-  // const lastName = document.getElementById('new-user-lname').value.trim();
+  const email = document.getElementById('new-user-email').value.trim();
+  const firstName = document.getElementById('new-user-fname').value.trim();
+  const lastName = document.getElementById('new-user-lname').value.trim();
 
-  const email = 'vivek.giri+newacc@okta.com';
-  const firstName = 'VK';
-  const lastName = 'NewAcc';
+  updateAppState({ username: email });
 
   authClient.idx.register({ firstName, lastName, email }).then(handleTransaction).catch(showError);
 }
+
+// TODO: if the next step has canSkip as true, we can skip that MFA step
+// by passing the skip: true in idx.proceed
+// https://developer.okta.com/docs/guides/oie-embedded-sdk-use-case-self-reg/nodejs/main/#the-user-skips-the-phone-authenticator

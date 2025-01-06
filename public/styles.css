@@ -6,7 +6,34 @@ body {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  margin: 0;
+}
+
+#main-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin: 0 20px; /* margin-top/bottom are 0, left and right are 20px */
+}
+
+#siw-section {
+  width: 60%;
+}
+
+#appState {
+  width: 40%;
+  height: 90vh;
+  padding: 10px;
+  align-self: flex-start;
+}
+
+.appState-group {
+  height: 90vh;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  overflow-wrap: break-word;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 /* Form Section */
@@ -86,7 +113,7 @@ button {
 }
 
 .auth-info {
-  margin-bottom: 15px;
+  margin: 15px 0;
 }
 
 .info-title {
@@ -96,7 +123,7 @@ button {
 
 #userInfo,
 #accessToken {
-  background-color: #f9f9f9;
+  background-color: #fff;
   padding: 10px;
   border-radius: 4px;
   border: 1px solid #ddd;
@@ -129,6 +156,21 @@ button {
 #show-forgot-password:hover {
   text-decoration: underline;
   cursor: pointer;
+}
+
+#logout {
+  background-color: #db2828;
+  color: white;
+  width: 15%;
+  padding: 5px;
+  text-decoration: none;
+  font-size: 1rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: backgr;
+  display: flex;
+  justify-content: center;
 }
 
 .form-button-section {
