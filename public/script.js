@@ -40,7 +40,7 @@ function submitDynamicFormAuto() {
 
   if (!storedUsername) return;
 
-  console.log('Using username stored in the appstate -> ', storedUsername);
+  console.log('Using username stored in the appstate to skip the identify-step');
 
   // submit the form with the stored username
   submitDynamicSigninForm(storedUsername);
@@ -147,7 +147,7 @@ function showMFA() {
         showMfaEnrollmentForm();
         break;
       case 'enroll-profile':
-        console.log('more work needed in enroll profile');
+        showRegistrationForm();
         break;
       case 'enroll-poll':
         showMfaEnrollPollForm();
@@ -550,7 +550,8 @@ function showForgotPassword(e) {
 }
 
 function submitForgotPassword(e) {
-  const username = document.getElementById('forgot-pass-username').value.trim();
+  // const username = document.getElementById('forgot-pass-username').value.trim();
+  const username = 'vivek.giri+newacc@okta.com';
 
   updateAppState({ username });
 
