@@ -7,9 +7,60 @@ var config = {
   redirectUri: 'http://localhost:3000/authorization-code/callback',
   useInteractionCodeFlow: true,
   scopes: ['openid', 'email'],
+  transformAuthState,
 };
 
-authClient = new OktaAuth(config);
+async function transformAuthState(oktaAuth, authState) {
+  if (!authState.isAuthenticated) {
+    return authState;
+  }
+
+  // check if the user has an valid Okta SSO session
+  // the user stores the getUserInfo data
+  const user = await oktaAuth.token.getUserInfo();
+  
+  authState.isAuthenticated = !!user; // convert to boolean
+  authState.users = user; // also store user object on authState
+
+  return authState;
+}
+
+// Wait for DOM content to be loaded before starting the app
+document.addEventListener('DOMContentLoaded', () => {
+  main();
+});
+
+function main() {
+  authClient = new OktaAuth(config);
+
+  renderApp();
+
+  // Calculates initial auth state and fires change event for listeners
+  // Also starts the token auto-renew service
+  // this is needed if you want to refresh the page and stay on the
+  // authenticated app
+  authClient.start();
+}
+
+function renderApp() {
+  const authState = authClient.authStateManager.getAuthState();
+  document.getElementById('authState-section').innerText = stringify(authState);
+
+
+  if (authState.isAuthenticated) {
+    // if the user is already authenticated, directly display the page
+    renderAuthenticatedState(authState);
+  }
+}
+
+function renderAuthenticatedState(authState) {
+  hideSigninForm();
+  document.getElementById('auth-section').style.display = 'block';
+  document.getElementById('accessToken').innerText = stringify(authState.accessToken);
+
+  const userInfoData = authState.users || {};
+  renderUserInfo(userInfoData)
+}
 
 function signInUser() {
   const username = document.getElementById('username').value.trim();
@@ -55,7 +106,7 @@ function submitDynamicSigninForm(storedUser) {
 }
 
 function handleTransaction(transaction) {
-  console.log(transaction);
+  // console.log(transaction);
 
   switch (transaction.status) {
     case 'PENDING':
@@ -103,7 +154,7 @@ function stringify(obj) {
 
 function updateAppState(props) {
   Object.assign(appState, props);
-  document.getElementById('appState-section').innerText = stringify(appState);
+  document.getElementById('transaction-section').innerText = stringify(appState.transaction || {});
 }
 
 function hideSigninForm() {
