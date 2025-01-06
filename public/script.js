@@ -18,7 +18,7 @@ async function transformAuthState(oktaAuth, authState) {
   // check if the user has an valid Okta SSO session
   // the user stores the getUserInfo data
   const user = await oktaAuth.token.getUserInfo();
-  
+
   authState.isAuthenticated = !!user; // convert to boolean
   authState.users = user; // also store user object on authState
 
@@ -33,7 +33,15 @@ document.addEventListener('DOMContentLoaded', () => {
 function main() {
   authClient = new OktaAuth(config);
 
-  renderApp();
+  // Subscribe to authState change event. Logic based on authState is done here.
+  authClient.authStateManager.subscribe(function (authState) {
+    if (!authState.isAuthenticated) {
+      // TODO: More work needed
+    }
+
+    // Render app based on the new authState
+    renderApp();
+  });
 
   // Calculates initial auth state and fires change event for listeners
   // Also starts the token auto-renew service
@@ -45,7 +53,6 @@ function main() {
 function renderApp() {
   const authState = authClient.authStateManager.getAuthState();
   document.getElementById('authState-section').innerText = stringify(authState);
-
 
   if (authState.isAuthenticated) {
     // if the user is already authenticated, directly display the page
@@ -59,7 +66,7 @@ function renderAuthenticatedState(authState) {
   document.getElementById('accessToken').innerText = stringify(authState.accessToken);
 
   const userInfoData = authState.users || {};
-  renderUserInfo(userInfoData)
+  renderUserInfo(userInfoData);
 }
 
 function signInUser() {
