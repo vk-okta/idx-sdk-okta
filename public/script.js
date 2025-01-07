@@ -330,8 +330,11 @@ function submitAuthenticatorVerificationDataApp() {
 function submitChallengePoll() {
   document.getElementById('challenge-poll-section').style.display = 'none';
 
-  // FIXME: the push notification is being sent but after approving it how to continue?
-  // authClient.idx.proceed({ }).then(handleTransaction).catch(showError);
+  const pollOptions = appState.transaction.nextStep?.poll;
+
+  if (pollOptions.required) {
+    authClient.idx.poll(pollOptions.refresh).then(handleTransaction).catch(showError);
+  }
 }
 
 // display the field to input the MFA
@@ -394,12 +397,10 @@ function hideEnrollPoll() {
 function submitEnrollPoll() {
   hideEnrollPoll();
 
-  // FIXME: once the code is scanned, the Okta verify authenticator is set for the user
-  // but nothing changes, in Okta Hosted widget....scanning the qr code takes you to the next page automatically
-  // but in here, nothing changes...calling proceed after scanning returns the same response as earlier
-  // effectively showing the same card
-
-  // authClient.idx.proceed().then(handleTransaction).catch(showError);
+  const pollOptions = appState.transaction.nextStep?.poll;
+  if (pollOptions.required) {
+    authClient.idx.poll(pollOptions.refresh).then(handleTransaction).catch(showError);
+  }
 }
 
 // ================================================= SUBMIT CHALLENGE AUTHENTICATOR =================================================
