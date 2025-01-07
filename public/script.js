@@ -100,7 +100,8 @@ function renderDynamicSigninForm(transaction) {
 }
 
 function submitDynamicFormAuto() {
-  // FIXME: Ideally imo the identify-step should not be there
+  // FIXME: BIG RED FLAG, Ideally imo the identify-step should not be there
+  // TRY TO AVOID THE FLOW COMING HERE LIKE A PLAGUE
   // here I am using the username stored in the appstate
   const storedUsername = appState.username;
 
@@ -221,6 +222,9 @@ function showMFA() {
       case 'challenge-poll':
         showChallengePoll();
         break;
+      case 'reset-authenticator':
+        showResetAuthenticatorForm();
+        break;
       default:
         throw new Error(`MORE WORK: showMfa: handle nextStep: ${nextStep.name}`);
     }
@@ -242,14 +246,18 @@ function showAuthenticatorVerificationData() {
 }
 
 function showAuthenticatorVerificationDataEmailAndPhone() {
-  document.getElementById('send-email-section').style.display = 'block';
-  document.getElementById('mfa-submit').innerText = 'Send';
+  document.getElementById('authenticator-verification-data-email-section').style.display = 'block';
 
   const options = appState.transaction.nextStep.inputs[0].options;
 
-  // TODO: Make a list from this options
-  console.log(options);
-  console.log('more work needed');
+  const selectElem = document.querySelector('#authenticator-verification-data-email-section select[name=methodType]');
+
+  options.forEach(function (option) {
+    const el = document.createElement('option');
+    el.setAttribute('value', option.value);
+    el.innerText = option.label;
+    selectElem.appendChild(el);
+  });
 }
 
 function showAuthenticatorVerificationApp() {
@@ -294,7 +302,15 @@ function submitMfa() {
     return submitChallengePoll();
   }
 
-  throw new Error(`MORE WORK: submitMfa: handle submit for nextStep: ${nextStep.name}`);
+  if (nextStep.name === 'reset-poll') {
+    return submitChallengePoll();
+  }
+
+  if (nextStep.name === 'reset-authenticator') {
+    return submitResetAuthenticator();
+  }
+
+  throw new Error(`MORE WORK: submitMfa handle submit for nextStep: ${nextStep.name}`);
 }
 
 function submitAuthenticatorVerificationData() {
@@ -312,11 +328,11 @@ function submitAuthenticatorVerificationData() {
 }
 
 function submitAuthenticatorVerificationDataEmail() {
-  document.getElementById('send-email-section').style.display = 'none';
-  const methodType = 'email';
+  document.getElementById('authenticator-verification-data-email-section').style.display = 'none';
 
-  // this is used to send the email to the user
-  authClient.idx.authenticate({ methodType }).then(handleTransaction).catch(showError);
+  const methodType = document.querySelector('#authenticator-verification-data-email-section select[name=methodType]').value;
+
+  authClient.idx.proceed({ methodType }).then(handleTransaction).catch(showError);
 }
 
 function submitAuthenticatorVerificationDataApp() {
@@ -670,14 +686,104 @@ function showForgotPassword(e) {
 }
 
 function submitForgotPassword(e) {
-  // const username = document.getElementById('forgot-pass-username').value.trim();
-  const username = 'vivek.giri+newacc@okta.com';
+  const username = document.getElementById('forgot-pass-username').value.trim();
 
   updateAppState({ username });
 
   document.getElementById('forgot-password-form').style.display = 'none';
 
   authClient.idx.recoverPassword({ username }).then(handleTransaction).catch(showError);
+}
+
+function showResetAuthenticatorForm() {
+  document.getElementById('reset-authenticator-section').style.display = 'block';
+
+  const authenticator = appState.transaction.nextStep.authenticator;
+
+  if (authenticator.type === 'password') {
+    return showNewPasswordForm();
+  }
+
+  throw new Error(`TODO: handle reset-authenticator for authenticator: ${authenticator.type}`);
+}
+
+function showNewPasswordForm() {
+  document.querySelector('#reset-authenticator-section .heading').innerText = 'Reset your Password';
+
+  // the password rules is stored in authenticator
+  const authenticator = appState.transaction.nextStep.authenticator;
+  showPasswordRules(authenticator.settings);
+
+  // if the form was already submitted, the transaction obj will have an error message
+  // display the error message here
+  const errorMessage = appState.transaction.messages;
+  if (errorMessage) {
+    showPasswordValidationError(errorMessage[0]?.message);
+  }
+}
+
+function submitResetAuthenticator() {
+  const newPass = document.querySelector('#reset-authenticator-section input[name=new-password]').value;
+  const cnfNewPass = document.querySelector('#reset-authenticator-section input[name=new-password-cnf]').value;
+
+  if (newPass !== cnfNewPass) {
+    showPasswordValidationError("Both the password doesn't match");
+    return;
+  }
+
+  document.getElementById('reset-authenticator-section').style.display = 'none';
+  hidePasswordRules();
+
+  authClient.idx.proceed({ password: newPass }).then(handleTransaction).catch(showError);
+}
+
+function showPasswordRules(rules) {
+  const complexityRules = rules?.complexity;
+  const ageRule = rules?.age;
+
+  const rulesLabel = [];
+
+  Object.keys(complexityRules).forEach((rule) => {
+    // excludeUsername = true
+    if (rule === 'excludeUsername' && complexityRules[rule]) rulesLabel.push('Username can not be part of password');
+    if (rule === 'minLength' && complexityRules[rule] > 0)
+      rulesLabel.push(`Minimum Length of Password should be ${complexityRules['minLength']}`);
+    if (rule === 'minLowerCase' && complexityRules[rule] > 0)
+      rulesLabel.push(`Password should have atleast ${complexityRules['minLowerCase']} lower case characters`);
+    if (rule === 'minUpperCase' && complexityRules[rule] > 0)
+      rulesLabel.push(`Password should have atleast ${complexityRules['minUpperCase']} upper case characters`);
+    if (rule === 'minNumber' && complexityRules[rule] > 0)
+      rulesLabel.push(`Password should have atleast ${complexityRules['minNumber']} numeric characters`);
+    if (rule === 'minSymbol' && complexityRules[rule] > 0)
+      rulesLabel.push(`Password should have atleast ${complexityRules['minSymbol']} special characters`);
+  });
+
+  // TODO: Add age rules in the rulesLabels
+
+  if (!rulesLabel.length) return;
+
+  const container = document.querySelector('#password-rules-group');
+  container.style.display = 'block';
+
+  rulesLabel.forEach(function (elem) {
+    const el = document.createElement('div');
+
+    el.innerHTML = `<span id='rules-label'>${elem}</span>`;
+
+    container.appendChild(el);
+  });
+}
+
+function hidePasswordRules() {
+  const container = document.querySelector('#password-rules-group');
+  container.style.display = 'none';
+
+  container.innerHTML = '';
+}
+
+function showPasswordValidationError(errorText) {
+  document.querySelector('#reset-authenticator-section .password-validation-error').style.display = 'block';
+  document.querySelector('#reset-authenticator-section .password-validation-error').innerText = errorText;
 }
 
 // ===================================================== REGISTER NEW USER =====================================================
@@ -707,3 +813,6 @@ function submitRegisterNewUser(e) {
 // TODO: if the next step has canSkip as true, we can skip that MFA step
 // by passing the skip: true in idx.proceed
 // https://developer.okta.com/docs/guides/oie-embedded-sdk-use-case-self-reg/nodejs/main/#the-user-skips-the-phone-authenticator
+
+// FIXME: when multiple enroll mfa is listed, no matter what you click the
+// email is auto selected
