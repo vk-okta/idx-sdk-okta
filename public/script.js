@@ -218,6 +218,9 @@ function showMFA() {
       case 'enroll-poll':
         showMfaEnrollPollForm();
         break;
+      case 'challenge-poll':
+        showChallengePoll();
+        break;
       default:
         throw new Error(`MORE WORK: showMfa: handle nextStep: ${nextStep.name}`);
     }
@@ -228,18 +231,43 @@ function showAuthenticatorVerificationData() {
   const authenticator = appState.transaction.nextStep.authenticator;
 
   if (authenticator.type === 'email' || authenticator.type === 'phone') {
-    document.getElementById('send-email-section').style.display = 'block';
-    document.getElementById('mfa-submit').innerText = 'Send';
     return showAuthenticatorVerificationDataEmailAndPhone();
+  }
+
+  if (authenticator.type === 'app') {
+    return showAuthenticatorVerificationApp();
   }
 
   throw new Error(`MORE WORK: handle authenticator-verification-data for authenticator type ${authenticator.type}`);
 }
+
 function showAuthenticatorVerificationDataEmailAndPhone() {
-  const options = appState.transaction.nextStep.inputs[0].options[0].value;
+  document.getElementById('send-email-section').style.display = 'block';
+  document.getElementById('mfa-submit').innerText = 'Send';
+
+  const options = appState.transaction.nextStep.inputs[0].options;
 
   // TODO: Make a list from this options
-  // console.log(options);
+  console.log(options);
+  console.log('more work needed');
+}
+
+function showAuthenticatorVerificationApp() {
+  document.getElementById('authenticator-verification-data-app-section').style.display = 'block';
+
+  const options = appState.transaction.nextStep.inputs[0].options;
+  const selectElem = document.querySelector('#authenticator-verification-data-app-section select[name=methodType]');
+
+  options.forEach(function (option) {
+    const el = document.createElement('option');
+    el.setAttribute('value', option.value);
+    el.innerText = option.label;
+    selectElem.appendChild(el);
+  });
+}
+
+function showChallengePoll() {
+  document.getElementById('challenge-poll-section').style.display = 'block';
 }
 
 function submitMfa() {
@@ -262,16 +290,24 @@ function submitMfa() {
     return submitEnrollPoll();
   }
 
+  if (nextStep.name === 'challenge-poll') {
+    return submitChallengePoll();
+  }
+
   throw new Error(`MORE WORK: submitMfa: handle submit for nextStep: ${nextStep.name}`);
 }
 
-// this is used to send the email to the user
 function submitAuthenticatorVerificationData() {
   const authenticator = appState.transaction.nextStep.authenticator;
 
   if (authenticator.type === 'email') {
     return submitAuthenticatorVerificationDataEmail();
   }
+
+  if (authenticator.type === 'app') {
+    return submitAuthenticatorVerificationDataApp();
+  }
+
   throw new Error(`MORE WORK: handle submit authenticator-verification-data for authenticator type ${authenticator.type}`);
 }
 
@@ -279,7 +315,23 @@ function submitAuthenticatorVerificationDataEmail() {
   document.getElementById('send-email-section').style.display = 'none';
   const methodType = 'email';
 
+  // this is used to send the email to the user
   authClient.idx.authenticate({ methodType }).then(handleTransaction).catch(showError);
+}
+
+function submitAuthenticatorVerificationDataApp() {
+  document.getElementById('authenticator-verification-data-app-section').style.display = 'none';
+
+  const methodType = document.querySelector('#authenticator-verification-data-app-section select[name=methodType]').value;
+
+  authClient.idx.authenticate({ methodType }).then(handleTransaction).catch(showError);
+}
+
+function submitChallengePoll() {
+  document.getElementById('challenge-poll-section').style.display = 'none';
+
+  // FIXME: the push notification is being sent but after approving it how to continue?
+  // authClient.idx.proceed({ }).then(handleTransaction).catch(showError);
 }
 
 // display the field to input the MFA
@@ -342,12 +394,12 @@ function hideEnrollPoll() {
 function submitEnrollPoll() {
   hideEnrollPoll();
 
-  // TODO: once the code is scanned, the Okta verify authenticator is set for the user
+  // FIXME: once the code is scanned, the Okta verify authenticator is set for the user
   // but nothing changes, in Okta Hosted widget....scanning the qr code takes you to the next page automatically
   // but in here, nothing changes...calling proceed after scanning returns the same response as earlier
   // effectively showing the same card
 
-  authClient.idx.proceed({ verificationCode: passCode }).then(handleTransaction).catch(showError);
+  // authClient.idx.proceed().then(handleTransaction).catch(showError);
 }
 
 // ================================================= SUBMIT CHALLENGE AUTHENTICATOR =================================================
