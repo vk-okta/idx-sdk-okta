@@ -127,6 +127,14 @@
           <button id="mfa-submit" onclick="submitMfa(event)" class="btn primary">Submit</button>
         </div>
 
+        <div id="authenticator-verification-data-email-section" class="form-section" style="display: none">
+          <label for="methodType">Select a method type:</label>
+          <select name="methodType">
+            <!-- methodTypes are dynamically inserted here -->
+          </select>
+          <button id="mfa-submit" onclick="submitMfa(event)" class="btn primary">Submit</button>
+        </div>
+
         <div id="challenge-poll-section" class="form-section" style="display: none">
           A push notification is sent to the app. Please approve and then continue
           <button id="mfa-submit" onclick="submitMfa(event)" class="btn primary">Continue</button>
@@ -189,6 +197,26 @@
           <button id="mfa-submit" onclick="submitMfa(event)" class="btn primary">Continue</button>
         </div>
 
+        <div id="reset-authenticator-section" class="form-section" style="display: none">
+          <label class="heading">Reset Your Password</label>
+
+          <div class="input-group">
+            <div id="password-rules-group" style="display: none;">
+              <p>Password Rules</p>
+              <div class="list-password-rules">
+                <!-- append password rules here -->
+              </div>
+            </div>
+
+            <label for="new-password">Password</label>
+            <input type="password" id="new-password" name="new-password" placeholder="Enter your new password" />
+            <label for="new-password-cnf">Re-enter Password</label>
+            <input type="password" id="new-password-cnf" name="new-password-cnf" placeholder="Re-enter your password" />
+          </div>
+          <label style="color: red; display: none" class="password-validation-error"></label>
+          <button id="mfa-submit" onclick="submitMfa(event)" class="btn primary">Submit</button>
+        </div>
+
         <div id="auth-section" class="auth-section" style="display: none">
           <div onclick="logOutUser()" id="logout">Log Out</div>
 
@@ -207,13 +235,13 @@
         <!-- display app state here -->
         <div class="info-title">Transaction Data</div>
         <div class="transaction-group">
-          <pre style="margin:0px;"><code id="transaction-section">
+          <pre style="margin: 0px"><code id="transaction-section">
           </code></pre>
         </div>
 
         <div class="info-title">Auth State Data</div>
         <div class="authState-group">
-          <pre style="margin:0px;"><code id="authState-section">
+          <pre style="margin: 0px"><code id="authState-section">
           </code></pre>
         </div>
       </div>
