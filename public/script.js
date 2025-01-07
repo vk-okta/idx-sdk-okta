@@ -77,8 +77,8 @@ function renderUnAuthenticatedState() {
 }
 
 function signInUser() {
-  const username = document.getElementById('username').value.trim();
-  // const username = 'vivek.giri+newacc@okta.com';
+  // const username = document.getElementById('username').value.trim();
+  const username = 'vivek.giri+newacc@okta.com';
 
   updateAppState({ username });
 
@@ -330,8 +330,8 @@ function submitAuthenticatorVerificationDataApp() {
 function submitChallengePoll() {
   document.getElementById('challenge-poll-section').style.display = 'none';
 
-  // TODO: the push notification is being sent but after approving it how to continue?
-  // authClient.idx.proceed({ username: appState.username }).then(handleTransaction).catch(showError);
+  // FIXME: the push notification is being sent but after approving it how to continue?
+  // authClient.idx.proceed({ }).then(handleTransaction).catch(showError);
 }
 
 // display the field to input the MFA
@@ -394,12 +394,12 @@ function hideEnrollPoll() {
 function submitEnrollPoll() {
   hideEnrollPoll();
 
-  // TODO: once the code is scanned, the Okta verify authenticator is set for the user
+  // FIXME: once the code is scanned, the Okta verify authenticator is set for the user
   // but nothing changes, in Okta Hosted widget....scanning the qr code takes you to the next page automatically
   // but in here, nothing changes...calling proceed after scanning returns the same response as earlier
   // effectively showing the same card
 
-  // authClient.idx.proceed({ verificationCode: passCode }).then(handleTransaction).catch(showError);
+  // authClient.idx.proceed().then(handleTransaction).catch(showError);
 }
 
 // ================================================= SUBMIT CHALLENGE AUTHENTICATOR =================================================
