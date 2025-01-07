@@ -55,9 +55,11 @@ function renderApp() {
   document.getElementById('authState-section').innerText = stringify(authState);
 
   if (authState.isAuthenticated) {
-    // if the user is already authenticated, directly display the page
-    renderAuthenticatedState(authState);
+    // if the user is already authenticated, directly display the tokens page
+    return renderAuthenticatedState(authState);
   }
+
+  return renderUnAuthenticatedState();
 }
 
 function renderAuthenticatedState(authState) {
@@ -69,8 +71,14 @@ function renderAuthenticatedState(authState) {
   renderUserInfo(userInfoData);
 }
 
+function renderUnAuthenticatedState() {
+  document.getElementById('auth-section').style.display = 'none';
+  showSignInFormSection();
+}
+
 function signInUser() {
-  const username = document.getElementById('username').value.trim();
+  // const username = document.getElementById('username').value.trim();
+  const username = 'vivek.giri+newacc@okta.com';
 
   updateAppState({ username });
 
@@ -113,7 +121,7 @@ function submitDynamicSigninForm(storedUser) {
 }
 
 function handleTransaction(transaction) {
-  // console.log(transaction);
+  console.log(transaction);
 
   switch (transaction.status) {
     case 'PENDING':
@@ -266,6 +274,7 @@ function submitAuthenticatorVerificationData() {
   }
   throw new Error(`MORE WORK: handle submit authenticator-verification-data for authenticator type ${authenticator.type}`);
 }
+
 function submitAuthenticatorVerificationDataEmail() {
   document.getElementById('send-email-section').style.display = 'none';
   const methodType = 'email';

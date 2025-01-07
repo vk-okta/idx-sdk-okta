@@ -35,6 +35,8 @@ body {
   background-color: #fff;
   overflow-wrap: break-word;
   overflow: auto;
+  border-radius: 4px;
+  border: 1px solid #ddd;
 }
 
 /* Form Section */
