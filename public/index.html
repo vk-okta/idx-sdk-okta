@@ -27,6 +27,9 @@
           <div id="register-user-section">
             <a id="show-register-user" onclick="showRegistrationForm(event)">Register New User</a>
           </div>
+          <div id="unlock-account-user-section">
+            <a id="show-unlock-account" onclick="showUnlockAccountForm(event)">Unlock Account</a>
+          </div>
         </div>
 
         <div id="dynamic-signin-form-section" style="display: none" class="form-section">
@@ -38,12 +41,25 @@
         </div>
 
         <div id="forgot-password-form" class="form-section" style="display: none">
+          <label>Reset Password</label>
           <div class="input-group">
             <label for="forgot-pass-username">Username</label>
             <input type="email" id="forgot-pass-username" name="forgot-pass-username" placeholder="Enter your email" />
           </div>
           <div class="form-button-section">
             <button onclick="submitForgotPassword(event)" class="btn primary">Submit</button>
+            <button onclick="showSignInFormSection(event)" class="btn">Go Back</button>
+          </div>
+        </div>
+
+        <div id="unlock-account-form" class="form-section" style="display: none">
+          <label>Unlock User</label>
+          <div class="input-group">
+            <label for="unlock-account-username">Username</label>
+            <input type="email" id="unlock-account-username" name="unlock-account-username" placeholder="Enter your email" />
+          </div>
+          <div class="form-button-section">
+            <button onclick="submitUnlockAccount(event)" class="btn primary">Submit</button>
             <button onclick="showSignInFormSection(event)" class="btn">Go Back</button>
           </div>
         </div>
@@ -140,6 +156,12 @@
           <button id="mfa-submit" onclick="submitMfa(event)" class="btn primary">Continue</button>
         </div>
 
+        <div id="challenge-poll-number-section" class="form-section" style="display: none">
+          <!-- show the correct number here -->
+           <div id="challenge-poll-number"></div>
+          <button id="mfa-submit" onclick="submitMfa(event)" class="btn primary">Continue</button>
+        </div>
+
         <div id="list-required-mfa-section" class="form-section" style="display: none">
           <label>MFA is Required</label>
           <!-- dynamically insert mfa list -->
@@ -201,7 +223,7 @@
           <label class="heading">Reset Your Password</label>
 
           <div class="input-group">
-            <div id="password-rules-group" style="display: none;">
+            <div id="password-rules-group" style="display: none">
               <p>Password Rules</p>
               <div class="list-password-rules">
                 <!-- append password rules here -->
@@ -218,7 +240,10 @@
         </div>
 
         <div id="auth-section" class="auth-section" style="display: none">
-          <div onclick="logOutUser()" id="logout">Log Out</div>
+          <div class="auth-btn-section">
+            <div onclick="logOutUser()" id="logout" style="background-color: #db2828">Log Out</div>
+            <div onclick="renewToken()" id="renew" style="background-color: #72ce81">Renew Tokens</div>
+          </div>
 
           <div class="auth-info">
             <div class="info-title">User Info</div>
@@ -232,6 +257,28 @@
       </div>
 
       <div id="state-data-section">
+        <div class="info-title">Config</div>
+        <div class="config-group">
+          <pre style="margin: 0px"><code id="config-section">
+          </code></pre>
+        </div>
+
+        <div id="error" style="display: none">
+          <div class="info-title">Error</div>
+          <div class="error-group">
+            <pre style="margin: 2px; color: red"><code id="error-section">
+          </code></pre>
+          </div>
+        </div>
+
+        <div id="transaction-msg" style="display: none">
+          <div class="info-title">Transaction Messages</div>
+          <div class="transaction-msg-group">
+            <pre style="margin: 2px; color: red"><code id="transaction-msg-section">
+          </code></pre>
+          </div>
+        </div>
+
         <!-- display app state here -->
         <div class="info-title">Transaction Data</div>
         <div class="transaction-group">

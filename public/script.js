@@ -6,7 +6,7 @@ var config = {
   clientId: '0oaehju4utBnhFRvP1d7',
   redirectUri: 'http://localhost:3000/authorization-code/callback',
   useInteractionCodeFlow: true,
-  scopes: ['openid', 'email'],
+  scopes: ['openid', 'email', 'offline_access'],
   transformAuthState,
 };
 
@@ -32,11 +32,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function main() {
   authClient = new OktaAuth(config);
+  document.getElementById('config-section').innerText = stringify(config);
 
   // Subscribe to authState change event. Logic based on authState is done here.
   authClient.authStateManager.subscribe(function (authState) {
     if (!authState.isAuthenticated) {
-      // TODO: More work needed
+      // TODO: more work needed
     }
 
     // Render app based on the new authState
@@ -77,8 +78,7 @@ function renderUnAuthenticatedState() {
 }
 
 function signInUser() {
-  // const username = document.getElementById('username').value.trim();
-  const username = 'vivek.giri+newacc@okta.com';
+  const username = document.getElementById('username').value.trim();
 
   updateAppState({ username });
 
@@ -110,19 +110,23 @@ function submitDynamicFormAuto() {
   console.log('Using username stored in the appstate to skip the identify-step');
 
   // submit the form with the stored username
-  submitDynamicSigninForm(storedUsername);
+  submitDynamicSigninForm({}, storedUsername);
 }
 
-function submitDynamicSigninForm(storedUser) {
+function submitDynamicSigninForm(event, storedUser) {
   document.getElementById('dynamic-signin-form-section').style.display = 'none';
 
-  const username = storedUser ? storedUser : document.querySelector('#dynamic-signin-form-section input[name=username]').value.trim();
+  const username = storedUser
+    ? storedUser
+    : document.querySelector('#dynamic-signin-form-section input[name=dynamic-username]').value.trim();
 
   return authClient.idx.proceed({ username }).then(handleTransaction).catch(showError);
 }
 
 function handleTransaction(transaction) {
   console.log(transaction);
+
+  if (transaction.messages) showTransactionMessage(transaction.messages);
 
   switch (transaction.status) {
     case 'PENDING':
@@ -141,7 +145,7 @@ function handleTransaction(transaction) {
       setTokens(transaction.tokens);
       break;
     default:
-      throw new Error('MORE WORK: add handling for ' + transaction.status + ' status');
+      throw new Error('TODO: add handling for ' + transaction.status + ' status');
   }
 }
 
@@ -153,12 +157,25 @@ function setTokens(tokens) {
   });
 }
 
+function showTransactionMessage(messages) {
+  const txt = messages[0].message;
+
+  document.getElementById('transaction-msg').style.display = 'block';
+  document.getElementById('transaction-msg-section').innerText = txt;
+}
+
 function showError(error) {
+  document.getElementById('error').style.display = 'block';
+  document.getElementById('error-section').innerText = error;
   console.log(error);
 }
 
 function logOutUser() {
   authClient.signOut();
+}
+
+function renewToken() {
+  authClient.tokenManager.renew('accessToken').catch(showError);
 }
 
 function stringify(obj) {
@@ -178,6 +195,13 @@ function hideSigninForm() {
 }
 function showSigninForm() {
   document.getElementById('sign-in-form').style.display = 'block';
+}
+
+function showSignInFormSection(e) {
+  showSigninForm();
+  document.getElementById('register-new-user-form').style.display = 'none';
+  document.getElementById('forgot-password-form').style.display = 'none';
+  document.getElementById('unlock-account-form').style.display = 'none';
 }
 
 async function renderTokens(accessToken, idToken) {
@@ -226,7 +250,7 @@ function showMFA() {
         showResetAuthenticatorForm();
         break;
       default:
-        throw new Error(`MORE WORK: showMfa: handle nextStep: ${nextStep.name}`);
+        throw new Error(`TODO: showMfa: handle nextStep: ${nextStep.name}`);
     }
   }
 }
@@ -242,7 +266,7 @@ function showAuthenticatorVerificationData() {
     return showAuthenticatorVerificationApp();
   }
 
-  throw new Error(`MORE WORK: handle authenticator-verification-data for authenticator type ${authenticator.type}`);
+  throw new Error(`TODO: handle authenticator-verification-data for authenticator type ${authenticator.type}`);
 }
 
 function showAuthenticatorVerificationDataEmailAndPhone() {
@@ -310,7 +334,7 @@ function submitMfa() {
     return submitResetAuthenticator();
   }
 
-  throw new Error(`MORE WORK: submitMfa handle submit for nextStep: ${nextStep.name}`);
+  throw new Error(`TODO: submitMfa handle submit for nextStep: ${nextStep.name}`);
 }
 
 function submitAuthenticatorVerificationData() {
@@ -324,7 +348,7 @@ function submitAuthenticatorVerificationData() {
     return submitAuthenticatorVerificationDataApp();
   }
 
-  throw new Error(`MORE WORK: handle submit authenticator-verification-data for authenticator type ${authenticator.type}`);
+  throw new Error(`TODO: handle submit authenticator-verification-data for authenticator type ${authenticator.type}`);
 }
 
 function submitAuthenticatorVerificationDataEmail() {
@@ -332,6 +356,8 @@ function submitAuthenticatorVerificationDataEmail() {
 
   const methodType = document.querySelector('#authenticator-verification-data-email-section select[name=methodType]').value;
 
+  // changed from authenticate to proceed, so that this doesn't disrupt the recover password(RP) flow
+  // when using authenticate, it tries to login to the app rather than continue to the RP flow
   authClient.idx.proceed({ methodType }).then(handleTransaction).catch(showError);
 }
 
@@ -446,10 +472,10 @@ function submitChallengeAuthenticator() {
     // if okta verify is of type code
     if (oktaVerifyType === 'verificationCode') return submitChallengeAppCode();
 
-    throw new Error(`MORE WORK: handle submit okta verify type for ${oktaVerifyType}`);
+    throw new Error(`TODO: handle submit okta verify type for ${oktaVerifyType}`);
   }
 
-  throw new Error(`MORE WORK: handle submit challenge-authenticator for authenticator type ${authenticator.type}`);
+  throw new Error(`TODO: handle submit challenge-authenticator for authenticator type ${authenticator.type}`);
 }
 function submitChallengeEmail() {
   document.getElementById('email-code-section').style.display = 'none';
@@ -491,6 +517,7 @@ function submitChallengeAppCode() {
 // ======================================================== ENROLL MFA FACTORS LIST ========================================================
 function showMfaEnrollFactors() {
   const mfaList = appState.transaction.nextStep.inputs[0].options;
+  const canSkip = appState.transaction.nextStep.canSkip;
   // mfaList = [{label: 'Email', value: 'okta_email'}, {label: 'Password', value: 'okta_password'}]
 
   const containerElement = document.getElementById('list-enroll-mfa-section');
@@ -507,6 +534,7 @@ function showMfaEnrollFactors() {
     el.innerHTML = `
     <div class="factor">
       <span>${mfaLabel}</span>
+      ${canSkip ? `<button class="skip-verify-button" onclick="skipMfaFactorForEnrollment(event)">Skip</button>` : ``} 
       <button class="verify-button" onclick="selectMfaFactorForEnrollment(event, '${mfaVal}')">Verify</button>
     </div>
   `;
@@ -527,7 +555,13 @@ function hideMfaEnroll() {
 function selectMfaFactorForEnrollment(e, authenticator) {
   hideMfaEnroll();
 
-  authClient.idx.authenticate({ authenticator }).then(handleTransaction).catch(showError);
+  authClient.idx.proceed({ authenticator }).then(handleTransaction).catch(showError);
+}
+
+function skipMfaFactorForEnrollment(e) {
+  hideMfaEnroll();
+
+  authClient.idx.proceed({ skip: true }).then(handleTransaction).catch(showError);
 }
 
 // ======================================================== ENROLL IN MFA ========================================================
@@ -548,7 +582,7 @@ function showMfaEnrollmentForm() {
     return showEnrollPassword();
   }
 
-  throw new Error(`MORE WORK: handle enroll showMfaEnrollmentForm for authenticator type ${authenticator.type}`);
+  throw new Error(`TODO: handle enroll showMfaEnrollmentForm for authenticator type ${authenticator.type}`);
 }
 
 function showEnrollSecurityQuestion(authenticator) {
@@ -567,7 +601,7 @@ function showEnrollSecurityQuestion(authenticator) {
 }
 
 function showEnrollEmail() {
-  document.getElementById('enroll-mfa-email-section').style.display = 'block';
+  document.getElementById('enroll-mfa-email-code-section').style.display = 'block';
 }
 
 function showEnrollPassword() {
@@ -589,7 +623,7 @@ function submitEnrollAuthenticator() {
     return submitEnrollChallengePassword();
   }
 
-  throw new Error(`MORE WORK: handle submit enrollment submitEnrollAuthenticator for authenticator type ${authenticator.type}`);
+  throw new Error(`TODO: handle submit enrollment submitEnrollAuthenticator for authenticator type ${authenticator.type}`);
 }
 
 function submitEnrollChallengeQuestion() {
@@ -601,21 +635,8 @@ function submitEnrollChallengeQuestion() {
   authClient.idx.authenticate({ credentials: { questionKey, answer } }).then(handleTransaction).catch(showError);
 }
 
-function sendEmail(event) {
-  document.getElementById('enroll-mfa-email-section').style.display = 'none';
-  document.getElementById('enroll-mfa-email-code-section').style.display = 'block';
-
-  const methodType = 'email';
-  authClient.idx.proceed({ methodType }).then(handleTransaction).catch(showError);
-  /* TODO: After sending this mail, the same type of response is returned
-  with next step as enroll-authenticator and type email
-  hence the same flow is repeated again and the send email card is still visible 
-  so the diplay none for that card doesn't works*/
-}
-
 function submitEnrollChallengeEmail() {
   document.getElementById('enroll-mfa-email-code-section').style.display = 'none';
-  document.getElementById('enroll-mfa-email-section').style.display = 'none';
 
   const passCode = document.querySelector('#enroll-mfa-email-code-section input[name=enroll-email-code]').value;
 
@@ -713,13 +734,6 @@ function showNewPasswordForm() {
   // the password rules is stored in authenticator
   const authenticator = appState.transaction.nextStep.authenticator;
   showPasswordRules(authenticator.settings);
-
-  // if the form was already submitted, the transaction obj will have an error message
-  // display the error message here
-  const errorMessage = appState.transaction.messages;
-  if (errorMessage) {
-    showPasswordValidationError(errorMessage[0]?.message);
-  }
 }
 
 function submitResetAuthenticator() {
@@ -739,12 +753,10 @@ function submitResetAuthenticator() {
 
 function showPasswordRules(rules) {
   const complexityRules = rules?.complexity;
-  const ageRule = rules?.age;
 
   const rulesLabel = [];
 
   Object.keys(complexityRules).forEach((rule) => {
-    // excludeUsername = true
     if (rule === 'excludeUsername' && complexityRules[rule]) rulesLabel.push('Username can not be part of password');
     if (rule === 'minLength' && complexityRules[rule] > 0)
       rulesLabel.push(`Minimum Length of Password should be ${complexityRules['minLength']}`);
@@ -757,8 +769,6 @@ function showPasswordRules(rules) {
     if (rule === 'minSymbol' && complexityRules[rule] > 0)
       rulesLabel.push(`Password should have atleast ${complexityRules['minSymbol']} special characters`);
   });
-
-  // TODO: Add age rules in the rulesLabels
 
   if (!rulesLabel.length) return;
 
@@ -792,27 +802,38 @@ function showRegistrationForm(e) {
   document.getElementById('register-new-user-form').style.display = 'block';
 }
 
-function showSignInFormSection(e) {
-  showSigninForm();
-  document.getElementById('register-new-user-form').style.display = 'none';
-  document.getElementById('forgot-password-form').style.display = 'none';
-}
-
 function submitRegisterNewUser(e) {
   document.getElementById('register-new-user-form').style.display = 'none';
 
-  const email = document.getElementById('new-user-email').value.trim();
-  const firstName = document.getElementById('new-user-fname').value.trim();
-  const lastName = document.getElementById('new-user-lname').value.trim();
+  // const email = document.getElementById('new-user-email').value.trim();
+  // const firstName = document.getElementById('new-user-fname').value.trim();
+  // const lastName = document.getElementById('new-user-lname').value.trim();
+
+  const email = 'vivek.giri+newacc@okta.com';
+  const firstName = 'sdfsdf';
+  const lastName = 'dszfds';
 
   updateAppState({ username: email });
 
   authClient.idx.register({ firstName, lastName, email }).then(handleTransaction).catch(showError);
 }
 
-// TODO: if the next step has canSkip as true, we can skip that MFA step
-// by passing the skip: true in idx.proceed
-// https://developer.okta.com/docs/guides/oie-embedded-sdk-use-case-self-reg/nodejs/main/#the-user-skips-the-phone-authenticator
+// ===================================================== UNLOCK ACCOUNT =====================================================
+function showUnlockAccountForm(e) {
+  hideSigninForm();
+  document.getElementById('unlock-account-form').style.display = 'block';
+}
 
-// FIXME: when multiple enroll mfa is listed, no matter what you click the
-// email is auto selected
+function submitUnlockAccount(e) {
+  document.getElementById('unlock-account-form').style.display = 'none';
+
+  // const username = document.getElementById('unlock-account-username').value.trim();
+  const username = 'vivek.giri+newacc@okta.com';
+
+  updateAppState({ username });
+
+  // FIXME: https://oktainc.atlassian.net/browse/OKTA-848066
+  authClient.idx.unlockAccount({ username }).then(handleTransaction).catch(showError);
+}
+
+// TODO: Add support for password recovery with okta verify. currently only email support

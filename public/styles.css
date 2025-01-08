@@ -7,6 +7,7 @@ body {
   align-items: center;
   min-height: 100vh;
   margin: 0 5px;
+  overflow-x: hidden;
 }
 
 #main-container {
@@ -29,8 +30,12 @@ body {
 }
 
 .transaction-group,
-.authState-group {
-  height: 40vh;
+.authState-group,
+.config-group,
+.error-group,
+.transaction-msg-group {
+  max-height: 30vh;
+  max-width: 95%;
   border: 1px solid #ccc;
   background-color: #fff;
   overflow-wrap: break-word;
@@ -39,7 +44,6 @@ body {
   border: 1px solid #ddd;
 }
 
-/* Form Section */
 .form-section {
   background-color: white;
   border-radius: 8px;
@@ -90,6 +94,16 @@ button,
   border: none;
 }
 
+.verify-button,
+.skip-verify-button {
+  padding: 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+  border: none;
+}
+
 button {
   margin-top: 10px;
 }
@@ -132,7 +146,7 @@ button {
   border: 1px solid #ddd;
   font-family: monospace;
   word-wrap: break-word;
-  max-width: 50%;
+  max-width: 70%;
 }
 
 .factor {
@@ -144,25 +158,28 @@ button {
 }
 
 #register-user-section,
-#forgot-password-section {
+#forgot-password-section,
+#unlock-account-user-section {
   margin-top: 15px;
 }
 
 #show-register-user,
-#show-forgot-password {
+#show-forgot-password,
+#show-unlock-account {
   color: #4caf50;
   text-decoration: none;
   font-size: 0.875rem;
 }
 
 #show-register-user:hover,
-#show-forgot-password:hover {
+#show-forgot-password:hover,
+#show-unlock-account:hover {
   text-decoration: underline;
   cursor: pointer;
 }
 
-#logout {
-  background-color: #db2828;
+#logout,
+#renew {
   color: white;
   width: 15%;
   padding: 5px;
@@ -175,7 +192,9 @@ button {
   justify-content: center;
 }
 
-.form-button-section {
+.form-button-section,
+.auth-btn-section {
+  max-width: 70%;
   display: flex;
   justify-content: space-between;
   align-items: center;
