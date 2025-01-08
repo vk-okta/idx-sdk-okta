@@ -96,7 +96,7 @@ function renderDynamicSigninForm(transaction) {
     document.querySelector('#dynamic-signin-form-section .dynamic-username-group').style.display = 'block';
   }
 
-  submitDynamicFormAuto();
+  // submitDynamicFormAuto();
 }
 
 function submitDynamicFormAuto() {
@@ -805,13 +805,9 @@ function showRegistrationForm(e) {
 function submitRegisterNewUser(e) {
   document.getElementById('register-new-user-form').style.display = 'none';
 
-  // const email = document.getElementById('new-user-email').value.trim();
-  // const firstName = document.getElementById('new-user-fname').value.trim();
-  // const lastName = document.getElementById('new-user-lname').value.trim();
-
-  const email = 'vivek.giri+newacc@okta.com';
-  const firstName = 'sdfsdf';
-  const lastName = 'dszfds';
+  const email = document.getElementById('new-user-email').value.trim();
+  const firstName = document.getElementById('new-user-fname').value.trim();
+  const lastName = document.getElementById('new-user-lname').value.trim();
 
   updateAppState({ username: email });
 
