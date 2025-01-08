@@ -517,6 +517,7 @@ function submitChallengeAppCode() {
 // ======================================================== ENROLL MFA FACTORS LIST ========================================================
 function showMfaEnrollFactors() {
   const mfaList = appState.transaction.nextStep.inputs[0].options;
+  const canSkip = appState.transaction.nextStep.canSkip;
   // mfaList = [{label: 'Email', value: 'okta_email'}, {label: 'Password', value: 'okta_password'}]
 
   const containerElement = document.getElementById('list-enroll-mfa-section');
@@ -534,6 +535,7 @@ function showMfaEnrollFactors() {
     <div class="factor">
       <span>${mfaLabel}</span>
       <button class="verify-button" onclick="selectMfaFactorForEnrollment(event, '${mfaVal}')">Verify</button>
+      ${canSkip ? `<button class="skip-verify-button" onclick="skipMfaFactorForEnrollment(event)">Skip</button>` : ``} 
     </div>
   `;
 
@@ -554,6 +556,12 @@ function selectMfaFactorForEnrollment(e, authenticator) {
   hideMfaEnroll();
 
   authClient.idx.authenticate({ authenticator }).then(handleTransaction).catch(showError);
+}
+
+function skipMfaFactorForEnrollment(e) {
+  hideMfaEnroll();
+
+  authClient.idx.proceed({ skip: true }).then(handleTransaction).catch(showError);
 }
 
 // ======================================================== ENROLL IN MFA ========================================================
@@ -712,8 +720,7 @@ function showForgotPassword(e) {
 }
 
 function submitForgotPassword(e) {
-  // const username = document.getElementById('forgot-pass-username').value.trim();
-  const username = 'vivek.giri+newacc@okta.com';
+  const username = document.getElementById('forgot-pass-username').value.trim();
 
   updateAppState({ username });
 
@@ -759,7 +766,6 @@ function submitResetAuthenticator() {
 
 function showPasswordRules(rules) {
   const complexityRules = rules?.complexity;
-  const ageRule = rules?.age;
 
   const rulesLabel = [];
 
@@ -777,8 +783,6 @@ function showPasswordRules(rules) {
     if (rule === 'minSymbol' && complexityRules[rule] > 0)
       rulesLabel.push(`Password should have atleast ${complexityRules['minSymbol']} special characters`);
   });
-
-  // TODO: Add age rules in the rulesLabels
 
   if (!rulesLabel.length) return;
 
