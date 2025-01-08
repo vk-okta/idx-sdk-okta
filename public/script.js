@@ -6,7 +6,7 @@ var config = {
   clientId: '0oaehju4utBnhFRvP1d7',
   redirectUri: 'http://localhost:3000/authorization-code/callback',
   useInteractionCodeFlow: true,
-  scopes: ['openid', 'email'],
+  scopes: ['openid', 'email', 'offline_access'],
   transformAuthState,
 };
 
@@ -32,6 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function main() {
   authClient = new OktaAuth(config);
+  document.getElementById('config-section').innerText = stringify(config);
 
   // Subscribe to authState change event. Logic based on authState is done here.
   authClient.authStateManager.subscribe(function (authState) {
@@ -162,6 +163,10 @@ function logOutUser() {
   authClient.signOut();
 }
 
+function renewToken() {
+  authClient.tokenManager.renew('accessToken').catch(showError);
+}
+
 function stringify(obj) {
   if (!obj) {
     return 'null';
@@ -179,6 +184,13 @@ function hideSigninForm() {
 }
 function showSigninForm() {
   document.getElementById('sign-in-form').style.display = 'block';
+}
+
+function showSignInFormSection(e) {
+  showSigninForm();
+  document.getElementById('register-new-user-form').style.display = 'none';
+  document.getElementById('forgot-password-form').style.display = 'none';
+  document.getElementById('unlock-account-form').style.display = 'none';
 }
 
 async function renderTokens(accessToken, idToken) {
@@ -795,12 +807,6 @@ function showRegistrationForm(e) {
   document.getElementById('register-new-user-form').style.display = 'block';
 }
 
-function showSignInFormSection(e) {
-  showSigninForm();
-  document.getElementById('register-new-user-form').style.display = 'none';
-  document.getElementById('forgot-password-form').style.display = 'none';
-}
-
 function submitRegisterNewUser(e) {
   document.getElementById('register-new-user-form').style.display = 'none';
 
@@ -813,9 +819,27 @@ function submitRegisterNewUser(e) {
   authClient.idx.register({ firstName, lastName, email }).then(handleTransaction).catch(showError);
 }
 
+// ===================================================== UNLOCK ACCOUNT =====================================================
+function showUnlockAccountForm(e) {
+  hideSigninForm();
+  document.getElementById('unlock-account-form').style.display = 'block';
+}
+
+function submitUnlockAccount(e) {
+  document.getElementById('unlock-account-form').style.display = 'none';
+
+  const username = document.getElementById('forgot-pass-username').value.trim();
+
+  updateAppState({ username });
+
+  authClient.idx.unlockAccount({ username }).then(handleTransaction).catch(showError);
+}
+
 // TODO: if the next step has canSkip as true, we can skip that MFA step
 // by passing the skip: true in idx.proceed
 // https://developer.okta.com/docs/guides/oie-embedded-sdk-use-case-self-reg/nodejs/main/#the-user-skips-the-phone-authenticator
 
 // FIXME: when multiple enroll mfa is listed,when registering a user, no matter what you click the
 // email is auto selected
+
+// TODO: Add support for password recovery with okta verify too. currently only email support
