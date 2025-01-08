@@ -156,6 +156,12 @@
           <button id="mfa-submit" onclick="submitMfa(event)" class="btn primary">Continue</button>
         </div>
 
+        <div id="challenge-poll-number-section" class="form-section" style="display: none">
+          <!-- show the correct number here -->
+           <div id="challenge-poll-number"></div>
+          <button id="mfa-submit" onclick="submitMfa(event)" class="btn primary">Continue</button>
+        </div>
+
         <div id="list-required-mfa-section" class="form-section" style="display: none">
           <label>MFA is Required</label>
           <!-- dynamically insert mfa list -->
@@ -257,7 +263,7 @@
           </code></pre>
         </div>
 
-        <div id="error" style="display: none;">
+        <div id="error" style="display: none">
           <div class="info-title">Error</div>
           <div class="error-group">
             <pre style="margin: 2px; color: red"><code id="error-section">
@@ -265,7 +271,7 @@
           </div>
         </div>
 
-        <div id="transaction-msg" style="display: none;">
+        <div id="transaction-msg" style="display: none">
           <div class="info-title">Transaction Messages</div>
           <div class="transaction-msg-group">
             <pre style="margin: 2px; color: red"><code id="transaction-msg-section">

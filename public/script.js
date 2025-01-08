@@ -96,7 +96,7 @@ function renderDynamicSigninForm(transaction) {
     document.querySelector('#dynamic-signin-form-section .dynamic-username-group').style.display = 'block';
   }
 
-  // submitDynamicFormAuto();
+  submitDynamicFormAuto();
 }
 
 function submitDynamicFormAuto() {
@@ -712,7 +712,8 @@ function showForgotPassword(e) {
 }
 
 function submitForgotPassword(e) {
-  const username = document.getElementById('forgot-pass-username').value.trim();
+  // const username = document.getElementById('forgot-pass-username').value.trim();
+  const username = 'vivek.giri+newacc@okta.com';
 
   updateAppState({ username });
 
@@ -832,7 +833,8 @@ function showUnlockAccountForm(e) {
 function submitUnlockAccount(e) {
   document.getElementById('unlock-account-form').style.display = 'none';
 
-  const username = document.getElementById('forgot-pass-username').value.trim();
+  // const username = document.getElementById('unlock-account-username').value.trim();
+  const username = 'vivek.giri+newacc@okta.com';
 
   updateAppState({ username });
 
@@ -847,4 +849,4 @@ function submitUnlockAccount(e) {
 // FIXME: when multiple enroll mfa is listed,when registering a user, no matter what you click the
 // email is auto selected
 
-// TODO: Add support for password recovery with okta verify too. currently only email support
+// TODO: Add support for password recovery with okta verify. currently only email support
