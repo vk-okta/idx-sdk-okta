@@ -156,6 +156,7 @@ function setTokens(tokens) {
 }
 
 function showError(error) {
+  document.getElementById('error').style.display = 'block'
   document.getElementById('error-section').innerText = error;
   console.log(error);
 }
@@ -833,6 +834,7 @@ function submitUnlockAccount(e) {
 
   updateAppState({ username });
 
+  // FIXME: https://oktainc.atlassian.net/browse/OKTA-848066
   authClient.idx.unlockAccount({ username }).then(handleTransaction).catch(showError);
 }
 
