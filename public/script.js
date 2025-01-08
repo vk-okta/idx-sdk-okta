@@ -126,6 +126,8 @@ function submitDynamicSigninForm(event, storedUser) {
 function handleTransaction(transaction) {
   console.log(transaction);
 
+  if (transaction.messages) showTransactionMessage(transaction.messages);
+
   switch (transaction.status) {
     case 'PENDING':
       if (transaction.nextStep.name === 'identify') {
@@ -155,8 +157,15 @@ function setTokens(tokens) {
   });
 }
 
+function showTransactionMessage(messages) {
+  const txt = messages[0].message;
+
+  document.getElementById('transaction-msg').style.display = 'block';
+  document.getElementById('transaction-msg-section').innerText = txt;
+}
+
 function showError(error) {
-  document.getElementById('error').style.display = 'block'
+  document.getElementById('error').style.display = 'block';
   document.getElementById('error-section').innerText = error;
   console.log(error);
 }
@@ -730,13 +739,6 @@ function showNewPasswordForm() {
   // the password rules is stored in authenticator
   const authenticator = appState.transaction.nextStep.authenticator;
   showPasswordRules(authenticator.settings);
-
-  // if the form was already submitted, the transaction obj will have an error message
-  // display the error message here
-  const errorMessage = appState.transaction.messages;
-  if (errorMessage) {
-    showPasswordValidationError(errorMessage[0]?.message);
-  }
 }
 
 function submitResetAuthenticator() {
