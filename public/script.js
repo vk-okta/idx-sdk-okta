@@ -77,8 +77,7 @@ function renderUnAuthenticatedState() {
 }
 
 function signInUser() {
-  // const username = document.getElementById('username').value.trim();
-  const username = 'vivek.giri+newacc@okta.com';
+  const username = document.getElementById('username').value.trim();
 
   updateAppState({ username });
 
@@ -96,7 +95,7 @@ function renderDynamicSigninForm(transaction) {
     document.querySelector('#dynamic-signin-form-section .dynamic-username-group').style.display = 'block';
   }
 
-  submitDynamicFormAuto();
+  // submitDynamicFormAuto();
 }
 
 function submitDynamicFormAuto() {
@@ -110,13 +109,15 @@ function submitDynamicFormAuto() {
   console.log('Using username stored in the appstate to skip the identify-step');
 
   // submit the form with the stored username
-  submitDynamicSigninForm(storedUsername);
+  submitDynamicSigninForm({}, storedUsername);
 }
 
-function submitDynamicSigninForm(storedUser) {
+function submitDynamicSigninForm(event, storedUser) {
   document.getElementById('dynamic-signin-form-section').style.display = 'none';
 
-  const username = storedUser ? storedUser : document.querySelector('#dynamic-signin-form-section input[name=username]').value.trim();
+  const username = storedUser
+    ? storedUser
+    : document.querySelector('#dynamic-signin-form-section input[name=dynamic-username]').value.trim();
 
   return authClient.idx.proceed({ username }).then(handleTransaction).catch(showError);
 }
