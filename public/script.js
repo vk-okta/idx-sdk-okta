@@ -36,7 +36,7 @@ function main() {
   // Subscribe to authState change event. Logic based on authState is done here.
   authClient.authStateManager.subscribe(function (authState) {
     if (!authState.isAuthenticated) {
-      // TODO: More work needed
+      // TODO: more work needed
     }
 
     // Render app based on the new authState
@@ -141,7 +141,7 @@ function handleTransaction(transaction) {
       setTokens(transaction.tokens);
       break;
     default:
-      throw new Error('MORE WORK: add handling for ' + transaction.status + ' status');
+      throw new Error('TODO: add handling for ' + transaction.status + ' status');
   }
 }
 
@@ -226,7 +226,7 @@ function showMFA() {
         showResetAuthenticatorForm();
         break;
       default:
-        throw new Error(`MORE WORK: showMfa: handle nextStep: ${nextStep.name}`);
+        throw new Error(`TODO: showMfa: handle nextStep: ${nextStep.name}`);
     }
   }
 }
@@ -242,7 +242,7 @@ function showAuthenticatorVerificationData() {
     return showAuthenticatorVerificationApp();
   }
 
-  throw new Error(`MORE WORK: handle authenticator-verification-data for authenticator type ${authenticator.type}`);
+  throw new Error(`TODO: handle authenticator-verification-data for authenticator type ${authenticator.type}`);
 }
 
 function showAuthenticatorVerificationDataEmailAndPhone() {
@@ -310,7 +310,7 @@ function submitMfa() {
     return submitResetAuthenticator();
   }
 
-  throw new Error(`MORE WORK: submitMfa handle submit for nextStep: ${nextStep.name}`);
+  throw new Error(`TODO: submitMfa handle submit for nextStep: ${nextStep.name}`);
 }
 
 function submitAuthenticatorVerificationData() {
@@ -324,7 +324,7 @@ function submitAuthenticatorVerificationData() {
     return submitAuthenticatorVerificationDataApp();
   }
 
-  throw new Error(`MORE WORK: handle submit authenticator-verification-data for authenticator type ${authenticator.type}`);
+  throw new Error(`TODO: handle submit authenticator-verification-data for authenticator type ${authenticator.type}`);
 }
 
 function submitAuthenticatorVerificationDataEmail() {
@@ -332,6 +332,8 @@ function submitAuthenticatorVerificationDataEmail() {
 
   const methodType = document.querySelector('#authenticator-verification-data-email-section select[name=methodType]').value;
 
+  // changed from authenticate to proceed, so that this doesn't disrupt the recover password(RP) flow
+  // when using authenticate, it tries to login to the app rather than continue to the RP flow
   authClient.idx.proceed({ methodType }).then(handleTransaction).catch(showError);
 }
 
@@ -446,10 +448,10 @@ function submitChallengeAuthenticator() {
     // if okta verify is of type code
     if (oktaVerifyType === 'verificationCode') return submitChallengeAppCode();
 
-    throw new Error(`MORE WORK: handle submit okta verify type for ${oktaVerifyType}`);
+    throw new Error(`TODO: handle submit okta verify type for ${oktaVerifyType}`);
   }
 
-  throw new Error(`MORE WORK: handle submit challenge-authenticator for authenticator type ${authenticator.type}`);
+  throw new Error(`TODO: handle submit challenge-authenticator for authenticator type ${authenticator.type}`);
 }
 function submitChallengeEmail() {
   document.getElementById('email-code-section').style.display = 'none';
@@ -548,7 +550,7 @@ function showMfaEnrollmentForm() {
     return showEnrollPassword();
   }
 
-  throw new Error(`MORE WORK: handle enroll showMfaEnrollmentForm for authenticator type ${authenticator.type}`);
+  throw new Error(`TODO: handle enroll showMfaEnrollmentForm for authenticator type ${authenticator.type}`);
 }
 
 function showEnrollSecurityQuestion(authenticator) {
@@ -589,7 +591,7 @@ function submitEnrollAuthenticator() {
     return submitEnrollChallengePassword();
   }
 
-  throw new Error(`MORE WORK: handle submit enrollment submitEnrollAuthenticator for authenticator type ${authenticator.type}`);
+  throw new Error(`TODO: handle submit enrollment submitEnrollAuthenticator for authenticator type ${authenticator.type}`);
 }
 
 function submitEnrollChallengeQuestion() {
@@ -814,5 +816,5 @@ function submitRegisterNewUser(e) {
 // by passing the skip: true in idx.proceed
 // https://developer.okta.com/docs/guides/oie-embedded-sdk-use-case-self-reg/nodejs/main/#the-user-skips-the-phone-authenticator
 
-// FIXME: when multiple enroll mfa is listed, no matter what you click the
+// FIXME: when multiple enroll mfa is listed,when registering a user, no matter what you click the
 // email is auto selected
