@@ -156,6 +156,7 @@ function setTokens(tokens) {
 }
 
 function showError(error) {
+  document.getElementById('error-section').innerText = error;
   console.log(error);
 }
 
