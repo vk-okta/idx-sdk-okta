@@ -534,8 +534,8 @@ function showMfaEnrollFactors() {
     el.innerHTML = `
     <div class="factor">
       <span>${mfaLabel}</span>
-      <button class="verify-button" onclick="selectMfaFactorForEnrollment(event, '${mfaVal}')">Verify</button>
       ${canSkip ? `<button class="skip-verify-button" onclick="skipMfaFactorForEnrollment(event)">Skip</button>` : ``} 
+      <button class="verify-button" onclick="selectMfaFactorForEnrollment(event, '${mfaVal}')">Verify</button>
     </div>
   `;
 
@@ -555,7 +555,7 @@ function hideMfaEnroll() {
 function selectMfaFactorForEnrollment(e, authenticator) {
   hideMfaEnroll();
 
-  authClient.idx.authenticate({ authenticator }).then(handleTransaction).catch(showError);
+  authClient.idx.proceed({ authenticator }).then(handleTransaction).catch(showError);
 }
 
 function skipMfaFactorForEnrollment(e) {
@@ -601,7 +601,7 @@ function showEnrollSecurityQuestion(authenticator) {
 }
 
 function showEnrollEmail() {
-  document.getElementById('enroll-mfa-email-section').style.display = 'block';
+  document.getElementById('enroll-mfa-email-code-section').style.display = 'block';
 }
 
 function showEnrollPassword() {
@@ -635,21 +635,8 @@ function submitEnrollChallengeQuestion() {
   authClient.idx.authenticate({ credentials: { questionKey, answer } }).then(handleTransaction).catch(showError);
 }
 
-function sendEmail(event) {
-  document.getElementById('enroll-mfa-email-section').style.display = 'none';
-  document.getElementById('enroll-mfa-email-code-section').style.display = 'block';
-
-  const methodType = 'email';
-  authClient.idx.proceed({ methodType }).then(handleTransaction).catch(showError);
-  /* TODO: After sending this mail, the same type of response is returned
-  with next step as enroll-authenticator and type email
-  hence the same flow is repeated again and the send email card is still visible 
-  so the diplay none for that card doesn't works*/
-}
-
 function submitEnrollChallengeEmail() {
   document.getElementById('enroll-mfa-email-code-section').style.display = 'none';
-  document.getElementById('enroll-mfa-email-section').style.display = 'none';
 
   const passCode = document.querySelector('#enroll-mfa-email-code-section input[name=enroll-email-code]').value;
 
@@ -770,7 +757,6 @@ function showPasswordRules(rules) {
   const rulesLabel = [];
 
   Object.keys(complexityRules).forEach((rule) => {
-    // excludeUsername = true
     if (rule === 'excludeUsername' && complexityRules[rule]) rulesLabel.push('Username can not be part of password');
     if (rule === 'minLength' && complexityRules[rule] > 0)
       rulesLabel.push(`Minimum Length of Password should be ${complexityRules['minLength']}`);
@@ -819,9 +805,13 @@ function showRegistrationForm(e) {
 function submitRegisterNewUser(e) {
   document.getElementById('register-new-user-form').style.display = 'none';
 
-  const email = document.getElementById('new-user-email').value.trim();
-  const firstName = document.getElementById('new-user-fname').value.trim();
-  const lastName = document.getElementById('new-user-lname').value.trim();
+  // const email = document.getElementById('new-user-email').value.trim();
+  // const firstName = document.getElementById('new-user-fname').value.trim();
+  // const lastName = document.getElementById('new-user-lname').value.trim();
+
+  const email = 'vivek.giri+newacc@okta.com';
+  const firstName = 'sdfsdf';
+  const lastName = 'dszfds';
 
   updateAppState({ username: email });
 
@@ -845,12 +835,5 @@ function submitUnlockAccount(e) {
   // FIXME: https://oktainc.atlassian.net/browse/OKTA-848066
   authClient.idx.unlockAccount({ username }).then(handleTransaction).catch(showError);
 }
-
-// TODO: if the next step has canSkip as true, we can skip that MFA step
-// by passing the skip: true in idx.proceed
-// https://developer.okta.com/docs/guides/oie-embedded-sdk-use-case-self-reg/nodejs/main/#the-user-skips-the-phone-authenticator
-
-// FIXME: when multiple enroll mfa is listed,when registering a user, no matter what you click the
-// email is auto selected
 
 // TODO: Add support for password recovery with okta verify. currently only email support
