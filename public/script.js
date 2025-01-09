@@ -38,6 +38,7 @@ function main() {
   authClient.authStateManager.subscribe(function (authState) {
     if (!authState.isAuthenticated) {
       // TODO: more work needed
+      renderUnAuthenticatedState();
     }
 
     // Render app based on the new authState
@@ -53,7 +54,6 @@ function main() {
 
 function renderApp() {
   const authState = authClient.authStateManager.getAuthState();
-  document.getElementById('authState-section').innerText = stringify(authState);
 
   if (authState.isAuthenticated) {
     // if the user is already authenticated, directly display the tokens page
@@ -187,7 +187,7 @@ function stringify(obj) {
 
 function updateAppState(props) {
   Object.assign(appState, props);
-  document.getElementById('transaction-section').innerText = stringify(appState.transaction.nextStep || {});
+  document.getElementById('transaction-section').innerText = stringify(appState.transaction?.nextStep || {});
 }
 
 function hideSigninForm() {
@@ -885,5 +885,4 @@ function selectMfaFactorForUnlockAccount(e, authenticator) {
   authClient.idx.proceed({ username: appState.username, authenticator }).then(handleTransaction).catch(showError);
 }
 
-// TODO: Add support for password recovery with okta verify. currently only email support
-// TODO: Add support for unlock account with okta verify. currently only email support
+// TODO: Add support for password recovery and unlock account with okta verify. currently only email support
