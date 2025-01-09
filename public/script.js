@@ -77,7 +77,7 @@ function renderUnAuthenticatedState() {
   showSignInFormSection();
 }
 
-function signInUser() {
+function submitSignInUser() {
   const username = document.getElementById('username').value.trim();
 
   updateAppState({ username });
@@ -96,7 +96,7 @@ function renderDynamicSigninForm(transaction) {
     document.querySelector('#dynamic-signin-form-section .dynamic-username-group').style.display = 'block';
   }
 
-  submitDynamicFormAuto();
+  // submitDynamicFormAuto();
 }
 
 function submitDynamicFormAuto() {
@@ -187,7 +187,7 @@ function stringify(obj) {
 
 function updateAppState(props) {
   Object.assign(appState, props);
-  document.getElementById('transaction-section').innerText = stringify(appState.transaction || {});
+  document.getElementById('transaction-section').innerText = stringify(appState.transaction.nextStep || {});
 }
 
 function hideSigninForm() {
@@ -249,8 +249,11 @@ function showMFA() {
       case 'reset-authenticator':
         showResetAuthenticatorForm();
         break;
+      case 'select-authenticator-unlock-account':
+        showUnlockAccountFormWithRemediators();
+        break;
       default:
-        throw new Error(`TODO: showMfa: handle nextStep: ${nextStep.name}`);
+        throw new Error(`TODO: showMfa handle nextStep: ${nextStep.name}`);
     }
   }
 }
@@ -805,13 +808,9 @@ function showRegistrationForm(e) {
 function submitRegisterNewUser(e) {
   document.getElementById('register-new-user-form').style.display = 'none';
 
-  // const email = document.getElementById('new-user-email').value.trim();
-  // const firstName = document.getElementById('new-user-fname').value.trim();
-  // const lastName = document.getElementById('new-user-lname').value.trim();
-
-  const email = 'vivek.giri+newacc@okta.com';
-  const firstName = 'sdfsdf';
-  const lastName = 'dszfds';
+  const email = document.getElementById('new-user-email').value.trim();
+  const firstName = document.getElementById('new-user-fname').value.trim();
+  const lastName = document.getElementById('new-user-lname').value.trim();
 
   updateAppState({ username: email });
 
@@ -832,8 +831,59 @@ function submitUnlockAccount(e) {
 
   updateAppState({ username });
 
-  // FIXME: https://oktainc.atlassian.net/browse/OKTA-848066
+  // this will need reviewing based on the JIRA https://oktainc.atlassian.net/browse/OKTA-848066
   authClient.idx.unlockAccount({ username }).then(handleTransaction).catch(showError);
 }
 
+function showUnlockAccountFormWithRemediators() {
+  document.getElementById('unlock-account-with-rmd-form').style.display = 'block';
+
+  // dynamically inserting the username because as of now in Okta username is needed
+  // in Okta SIW as of now the username is needed
+  document.getElementById('unlock-account-username-with-rmd').value = appState.username;
+
+  const mfaList = appState.transaction.nextStep.inputs[1].options;
+
+  const containerElement = document.getElementById('unlock-account-rmd-list');
+  containerElement.style.display = 'block';
+
+  mfaList.forEach(function (elem) {
+    const mfaLabel = elem.label;
+    const mfaVal = elem.value;
+
+    const el = document.createElement('div');
+    el.setAttribute('id', `verify-factor-${mfaVal}`);
+    el.setAttribute('class', `factor`);
+
+    el.innerHTML = `
+    <div class="factor">
+      <span>${mfaLabel}</span>
+      <button class="verify-button" onclick="selectMfaFactorForUnlockAccount(event, '${mfaVal}')">Verify</button>
+    </div>
+  `;
+
+    containerElement.appendChild(el);
+  });
+}
+
+function hideMfaUnlockList() {
+  // the dynamically inserted list of MFA needs to be cleared
+  const containerElement = document.getElementById('unlock-account-rmd-list');
+  containerElement.style.display = 'none';
+
+  // Clear only the dynamically inserted MFA factors (div elements retain the label)
+  const mfaElements = containerElement.querySelectorAll('.factor');
+  mfaElements.forEach((el) => el.remove());
+}
+
+function selectMfaFactorForUnlockAccount(e, authenticator) {
+  document.getElementById('unlock-account-with-rmd-form').style.display = 'none';
+
+  hideMfaUnlockList();
+
+  // the username needs to be passed as of now
+  authClient.idx.proceed({ username: appState.username, authenticator }).then(handleTransaction).catch(showError);
+}
+
 // TODO: Add support for password recovery with okta verify. currently only email support
+// TODO: Add support for unlock account with okta verify. currently only email support

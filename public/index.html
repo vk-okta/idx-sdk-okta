@@ -18,7 +18,7 @@
             <label for="username">Username</label>
             <input type="email" id="username" name="username" placeholder="Enter your email" />
           </div>
-          <button onclick="signInUser()" class="btn primary">Sign In</button>
+          <button onclick="submitSignInUser()" class="btn primary">Sign In</button>
 
           <div id="forgot-password-section">
             <a id="show-forgot-password" onclick="showForgotPassword(event)">Forgot Password</a>
@@ -61,6 +61,21 @@
           <div class="form-button-section">
             <button onclick="submitUnlockAccount(event)" class="btn primary">Submit</button>
             <button onclick="showSignInFormSection(event)" class="btn">Go Back</button>
+          </div>
+        </div>
+
+        <div id="unlock-account-with-rmd-form" class="form-section" style="display: none">
+          <div class="input-group">
+            <label for="unlock-account-username-with-rmd">Username</label>
+            <input
+              type="email"
+              id="unlock-account-username-with-rmd"
+              name="unlock-account-username-with-rmd"
+              placeholder="Enter your email"
+            />
+          </div>
+          <div id="unlock-account-rmd-list" style="display: none">
+            <!-- insert mfa list here -->
           </div>
         </div>
 
@@ -158,7 +173,7 @@
 
         <div id="challenge-poll-number-section" class="form-section" style="display: none">
           <!-- show the correct number here -->
-           <div id="challenge-poll-number"></div>
+          <div id="challenge-poll-number"></div>
           <button id="mfa-submit" onclick="submitMfa(event)" class="btn primary">Continue</button>
         </div>
 
