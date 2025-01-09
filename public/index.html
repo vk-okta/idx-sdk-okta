@@ -13,7 +13,7 @@
   <body>
     <div id="main-container">
       <div id="siw-section">
-        <div id="sign-in-form" class="form-section" style="display: none;">
+        <div id="sign-in-form" class="form-section" style="display: none">
           <div class="input-group">
             <label for="username">Username</label>
             <input type="email" id="username" name="username" placeholder="Enter your email" />
@@ -30,6 +30,20 @@
           <div id="unlock-account-user-section">
             <a id="show-unlock-account" onclick="showUnlockAccountForm(event)">Unlock Account</a>
           </div>
+        </div>
+
+        <div id="config-form-section" class="form-section" style="display: block">
+          <div class="input-group">
+            <label for="issuer">Issuer</label>
+            <input type="text" id="issuer" name="issuer" placeholder="Enter Issuer" />
+            <label for="clientId">Client Id</label>
+            <input type="text" id="clientId" name="clientId" placeholder="Enter Client Id" />
+            <label for="redirectUri">Redirect URI</label>
+            <input type="text" id="redirectUri" name="redirectUri" placeholder="Enter Redirect URI" />
+            <label for="scopes">Scopes</label>
+            <input type="text" id="scopes" name="scopes" placeholder="Enter Scopes" />
+          </div>
+          <button onclick="submitConfig()" class="btn primary">Save</button>
         </div>
 
         <div id="dynamic-signin-form-section" style="display: none" class="form-section">

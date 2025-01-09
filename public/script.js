@@ -37,7 +37,6 @@ function main() {
   // Subscribe to authState change event. Logic based on authState is done here.
   authClient.authStateManager.subscribe(function (authState) {
     if (!authState.isAuthenticated) {
-      // TODO: more work needed
       renderUnAuthenticatedState();
     }
 
@@ -50,6 +49,11 @@ function main() {
   // this is needed if you want to refresh the page and stay on the
   // authenticated app
   authClient.start();
+}
+
+function loadConfig() {
+  Object.assign(config, )
+  document.getElementById('config-section').innerText = stringify(config);
 }
 
 function renderApp() {
@@ -75,6 +79,15 @@ function renderAuthenticatedState(authState) {
 function renderUnAuthenticatedState() {
   document.getElementById('auth-section').style.display = 'none';
   showSignInFormSection();
+}
+
+function submitConfig() {
+  const issuer = document.querySelector('#config-form-section input[name=issuer]').value.trim();
+  const clientId = document.querySelector('#config-form-section input[name=clientId]').value.trim();
+  const redirectUri = document.querySelector('#config-form-section input[name=redirectUri]').value.trim();
+  const scopes = document.querySelector('#config-form-section input[name=scopes]').value.trim();
+
+  return { issuer, clientId, redirectUri, scopes };
 }
 
 function submitSignInUser() {
