@@ -1,14 +1,6 @@
 let authClient = {};
 var appState = {};
-
-var config = {
-  issuer: 'https://vivek-giri.oktapreview.com/oauth2/ausae177jfbCM7LBp1d7',
-  clientId: '0oaehju4utBnhFRvP1d7',
-  redirectUri: 'http://localhost:3000/authorization-code/callback',
-  useInteractionCodeFlow: true,
-  scopes: ['openid', 'email', 'offline_access'],
-  transformAuthState,
-};
+var config = {};
 
 async function transformAuthState(oktaAuth, authState) {
   if (!authState.isAuthenticated) {
@@ -27,19 +19,21 @@ async function transformAuthState(oktaAuth, authState) {
 
 // Wait for DOM content to be loaded before starting the app
 document.addEventListener('DOMContentLoaded', () => {
+  // this loads the config from the localstorage
   loadConfig();
 
+  // start the app
   main();
 });
 
-function createAuthClient() {
-  authClient = new OktaAuth(config);
-}
-
 function main() {
-  createAuthClient();
+  // if config object is empty show config form
+  if (Object.keys(config).length === 0) {
+    showConfigForm();
+    return;
+  }
 
-  document.getElementById('config-section').innerText = stringify(config);
+  createAuthClient();
 
   // Subscribe to authState change event. Logic based on authState is done here.
   authClient.authStateManager.subscribe(function (authState) {
@@ -58,15 +52,39 @@ function main() {
   authClient.start();
 }
 
-function loadConfig(newConfig) {
-  Object.assign(config, newConfig);
-  document.getElementById('config-section').innerText = stringify(config);
-  
-  createAuthClient();
+function createAuthClient() {
+  try {
+    authClient = new OktaAuth({
+      ...config,
+      redirectUri: 'http://localhost:3000/authorization-code/callback',
+      useInteractionCodeFlow: true,
+      transformAuthState,
+    });
+
+    const showConfigData = {
+      ...config,
+      redirectUri: 'http://localhost:3000/authorization-code/callback',
+      useInteractionCodeFlow: true,
+    };
+
+    localStorage.setItem('config', JSON.stringify(showConfigData));
+
+    document.getElementById('config-section').innerText = stringify(showConfigData);
+  } catch (error) {
+    showError(error);
+    console.log(error);
+  }
+}
+
+function loadConfig() {
+  const storedConfig = JSON.parse(localStorage.getItem('config'));
+
+  if (storedConfig) Object.assign(config, storedConfig);
 }
 
 function renderApp() {
   const authState = authClient.authStateManager.getAuthState();
+  document.getElementById('authState-section').innerText = stringify(authState);
 
   if (authState.isAuthenticated) {
     // if the user is already authenticated, directly display the tokens page
@@ -102,15 +120,15 @@ function hideConfigForm() {
 function submitConfig() {
   const issuer = document.querySelector('#config-form-section input[name=issuer]').value.trim();
   const clientId = document.querySelector('#config-form-section input[name=clientId]').value.trim();
-  const redirectUri = document.querySelector('#config-form-section input[name=redirectUri]').value.trim();
-  const scopes = document.querySelector('#config-form-section input[name=scopes]').value.trim();
+  const scopes = document.querySelector('#config-form-section input[name=scopes]').value.trim().split(' ');
 
-  if (!issuer || !clientId || !redirectUri || !scopes) return;
+  if (!issuer || !clientId || !scopes) return;
 
   hideConfigForm();
   showSignInFormSection();
 
-  loadConfig({ issuer, clientId, redirectUri, scopes: scopes.split(' ') });
+  Object.assign(config, { issuer, clientId, scopes });
+  createAuthClient()
 }
 
 function submitSignInUser() {
@@ -179,6 +197,7 @@ function handleTransaction(transaction) {
     case 'SUCCESS':
       hideSigninForm();
       setTokens(transaction.tokens);
+      updateAppState({ transaction });
       break;
     default:
       throw new Error('TODO: add handling for ' + transaction.status + ' status');
@@ -223,7 +242,7 @@ function stringify(obj) {
 
 function updateAppState(props) {
   Object.assign(appState, props);
-  document.getElementById('transaction-section').innerText = stringify(appState.transaction?.nextStep || {});
+  document.getElementById('transaction-section').innerText = stringify(appState.transaction?.nextStep || appState.transaction || {});
 }
 
 function hideSigninForm() {
