@@ -13,9 +13,13 @@
   <body>
     <div id="main-container">
       <div id="siw-section">
-        <div id="sign-in-form" class="form-section">
+        <div id="sign-in-form" class="form-section" style="display: none">
           <div class="input-group">
-            <label for="username">Username</label>
+            <div style="display: flex; justify-content: space-between; align-items: center">
+              <label for="username">Username</label>
+              <a id="show-register-user" onclick="showConfigForm()">Change Config</a>
+            </div>
+
             <input type="email" id="username" name="username" placeholder="Enter your email" />
           </div>
           <button onclick="submitSignInUser()" class="btn primary">Sign In</button>
@@ -29,6 +33,24 @@
           </div>
           <div id="unlock-account-user-section">
             <a id="show-unlock-account" onclick="showUnlockAccountForm(event)">Unlock Account</a>
+          </div>
+        </div>
+
+        <div id="config-form-section" class="form-section" style="display: none">
+          <label>Enter the Details to Start</label>
+          <div class="input-group">
+            <label for="issuer">Issuer</label>
+            <input type="text" id="issuer" name="issuer" placeholder="Enter Issuer" />
+            <label for="clientId">Client Id</label>
+            <input type="text" id="clientId" name="clientId" placeholder="Enter Client Id" />
+            <label for="redirectUri">Redirect URI</label>
+            <input type="text" id="redirectUri" name="redirectUri" placeholder="Enter Redirect URI" />
+            <label for="scopes">Scopes</label>
+            <input type="text" id="scopes" name="scopes" placeholder="Enter Scopes" />
+          </div>
+          <div class="form-button-section">
+            <button onclick="submitConfig()" class="btn primary">Save</button>
+            <button onclick="showSignInFormSection()" class="btn">Go Back</button>
           </div>
         </div>
 

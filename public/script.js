@@ -27,17 +27,24 @@ async function transformAuthState(oktaAuth, authState) {
 
 // Wait for DOM content to be loaded before starting the app
 document.addEventListener('DOMContentLoaded', () => {
+  loadConfig();
+
   main();
 });
 
-function main() {
+function createAuthClient() {
   authClient = new OktaAuth(config);
+}
+
+function main() {
+  createAuthClient();
+
   document.getElementById('config-section').innerText = stringify(config);
 
   // Subscribe to authState change event. Logic based on authState is done here.
   authClient.authStateManager.subscribe(function (authState) {
     if (!authState.isAuthenticated) {
-      // TODO: more work needed
+      renderUnAuthenticatedState();
     }
 
     // Render app based on the new authState
@@ -51,9 +58,15 @@ function main() {
   authClient.start();
 }
 
+function loadConfig(newConfig) {
+  Object.assign(config, newConfig);
+  document.getElementById('config-section').innerText = stringify(config);
+  
+  createAuthClient();
+}
+
 function renderApp() {
   const authState = authClient.authStateManager.getAuthState();
-  document.getElementById('authState-section').innerText = stringify(authState);
 
   if (authState.isAuthenticated) {
     // if the user is already authenticated, directly display the tokens page
@@ -75,6 +88,29 @@ function renderAuthenticatedState(authState) {
 function renderUnAuthenticatedState() {
   document.getElementById('auth-section').style.display = 'none';
   showSignInFormSection();
+}
+
+function showConfigForm() {
+  document.getElementById('config-form-section').style.display = 'block';
+  hideSigninForm();
+}
+
+function hideConfigForm() {
+  document.getElementById('config-form-section').style.display = 'none';
+}
+
+function submitConfig() {
+  const issuer = document.querySelector('#config-form-section input[name=issuer]').value.trim();
+  const clientId = document.querySelector('#config-form-section input[name=clientId]').value.trim();
+  const redirectUri = document.querySelector('#config-form-section input[name=redirectUri]').value.trim();
+  const scopes = document.querySelector('#config-form-section input[name=scopes]').value.trim();
+
+  if (!issuer || !clientId || !redirectUri || !scopes) return;
+
+  hideConfigForm();
+  showSignInFormSection();
+
+  loadConfig({ issuer, clientId, redirectUri, scopes: scopes.split(' ') });
 }
 
 function submitSignInUser() {
@@ -187,7 +223,7 @@ function stringify(obj) {
 
 function updateAppState(props) {
   Object.assign(appState, props);
-  document.getElementById('transaction-section').innerText = stringify(appState.transaction.nextStep || {});
+  document.getElementById('transaction-section').innerText = stringify(appState.transaction?.nextStep || {});
 }
 
 function hideSigninForm() {
@@ -202,6 +238,7 @@ function showSignInFormSection(e) {
   document.getElementById('register-new-user-form').style.display = 'none';
   document.getElementById('forgot-password-form').style.display = 'none';
   document.getElementById('unlock-account-form').style.display = 'none';
+  hideConfigForm();
 }
 
 async function renderTokens(accessToken, idToken) {
@@ -885,5 +922,4 @@ function selectMfaFactorForUnlockAccount(e, authenticator) {
   authClient.idx.proceed({ username: appState.username, authenticator }).then(handleTransaction).catch(showError);
 }
 
-// TODO: Add support for password recovery with okta verify. currently only email support
-// TODO: Add support for unlock account with okta verify. currently only email support
+// TODO: Add support for password recovery and unlock account with okta verify. currently only email support
