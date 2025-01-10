@@ -61,7 +61,7 @@ function main() {
 function loadConfig(newConfig) {
   Object.assign(config, newConfig);
   document.getElementById('config-section').innerText = stringify(config);
-  
+
   createAuthClient();
 }
 
@@ -179,6 +179,7 @@ function handleTransaction(transaction) {
     case 'SUCCESS':
       hideSigninForm();
       setTokens(transaction.tokens);
+      updateAppState({ transaction });
       break;
     default:
       throw new Error('TODO: add handling for ' + transaction.status + ' status');
@@ -223,7 +224,7 @@ function stringify(obj) {
 
 function updateAppState(props) {
   Object.assign(appState, props);
-  document.getElementById('transaction-section').innerText = stringify(appState.transaction?.nextStep || {});
+  document.getElementById('transaction-section').innerText = stringify(appState.transaction?.nextStep || appState.transaction || {});
 }
 
 function hideSigninForm() {
