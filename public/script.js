@@ -84,6 +84,7 @@ function loadConfig() {
 
 function renderApp() {
   const authState = authClient.authStateManager.getAuthState();
+  document.getElementById('authState-section').innerText = stringify(authState);
 
   if (authState.isAuthenticated) {
     // if the user is already authenticated, directly display the tokens page
