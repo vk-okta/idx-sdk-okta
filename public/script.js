@@ -27,11 +27,18 @@ async function transformAuthState(oktaAuth, authState) {
 
 // Wait for DOM content to be loaded before starting the app
 document.addEventListener('DOMContentLoaded', () => {
+  loadConfig();
+
   main();
 });
 
-function main() {
+function createAuthClient() {
   authClient = new OktaAuth(config);
+}
+
+function main() {
+  createAuthClient();
+
   document.getElementById('config-section').innerText = stringify(config);
 
   // Subscribe to authState change event. Logic based on authState is done here.
@@ -51,9 +58,11 @@ function main() {
   authClient.start();
 }
 
-function loadConfig() {
-  Object.assign(config, )
+function loadConfig(newConfig) {
+  Object.assign(config, newConfig);
   document.getElementById('config-section').innerText = stringify(config);
+  
+  createAuthClient();
 }
 
 function renderApp() {
@@ -81,13 +90,27 @@ function renderUnAuthenticatedState() {
   showSignInFormSection();
 }
 
+function showConfigForm() {
+  document.getElementById('config-form-section').style.display = 'block';
+  hideSigninForm();
+}
+
+function hideConfigForm() {
+  document.getElementById('config-form-section').style.display = 'none';
+}
+
 function submitConfig() {
   const issuer = document.querySelector('#config-form-section input[name=issuer]').value.trim();
   const clientId = document.querySelector('#config-form-section input[name=clientId]').value.trim();
   const redirectUri = document.querySelector('#config-form-section input[name=redirectUri]').value.trim();
   const scopes = document.querySelector('#config-form-section input[name=scopes]').value.trim();
 
-  return { issuer, clientId, redirectUri, scopes };
+  if (!issuer || !clientId || !redirectUri || !scopes) return;
+
+  hideConfigForm();
+  showSignInFormSection();
+
+  loadConfig({ issuer, clientId, redirectUri, scopes: scopes.split(' ') });
 }
 
 function submitSignInUser() {
@@ -215,6 +238,7 @@ function showSignInFormSection(e) {
   document.getElementById('register-new-user-form').style.display = 'none';
   document.getElementById('forgot-password-form').style.display = 'none';
   document.getElementById('unlock-account-form').style.display = 'none';
+  hideConfigForm();
 }
 
 async function renderTokens(accessToken, idToken) {
