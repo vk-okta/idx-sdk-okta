@@ -1,6 +1,10 @@
 let authClient = {};
 var appState = {};
-var config = {};
+var config = {
+  issuer: 'https://vivek-giri.oktapreview.com/oauth2/ausae177jfbCM7LBp1d7',
+  clientId: '0oaehju4utBnhFRvP1d7',
+  scopes: ['openid', 'profile', 'offline_access'],
+};
 
 async function transformAuthState(oktaAuth, authState) {
   if (!authState.isAuthenticated) {
@@ -19,7 +23,7 @@ async function transformAuthState(oktaAuth, authState) {
 
 // Wait for DOM content to be loaded before starting the app
 document.addEventListener('DOMContentLoaded', () => {
-  // this loads the config from the localstorage
+  // this loads the config from the sessionStorage
   loadConfig();
 
   // start the app
@@ -45,11 +49,29 @@ function main() {
     renderApp();
   });
 
+  const search = window.location.search;
+  // Social/IDP callback
+  if (authClient.idx.isInteractionRequired(search)) {
+    idxProceed();
+    return;
+  }
+
+  startApp();
+}
+
+function startApp() {
   // Calculates initial auth state and fires change event for listeners
   // Also starts the token auto-renew service
   // this is needed if you want to refresh the page and stay on the
   // authenticated app
   authClient.start();
+
+  // using this to check available idps
+  authClient.idx.start().then(handleTransaction).catch(showError);
+}
+
+function idxProceed() {
+  authClient.idx.proceed().then(handleTransaction).catch(showError);
 }
 
 function createAuthClient() {
@@ -67,7 +89,7 @@ function createAuthClient() {
       useInteractionCodeFlow: true,
     };
 
-    localStorage.setItem('config', JSON.stringify(showConfigData));
+    sessionStorage.setItem('config', JSON.stringify(showConfigData));
 
     document.getElementById('config-section').innerText = stringify(showConfigData);
   } catch (error) {
@@ -77,7 +99,7 @@ function createAuthClient() {
 }
 
 function loadConfig() {
-  const storedConfig = JSON.parse(localStorage.getItem('config'));
+  const storedConfig = JSON.parse(sessionStorage.getItem('config'));
 
   if (storedConfig) Object.assign(config, storedConfig);
 }
@@ -128,7 +150,7 @@ function submitConfig() {
   showSignInFormSection();
 
   Object.assign(config, { issuer, clientId, scopes });
-  createAuthClient()
+  createAuthClient();
 }
 
 function submitSignInUser() {
@@ -185,7 +207,14 @@ function handleTransaction(transaction) {
   switch (transaction.status) {
     case 'PENDING':
       if (transaction.nextStep.name === 'identify') {
-        renderDynamicSigninForm(transaction);
+        console.log('identify step found');
+
+        // renderDynamicSigninForm(transaction);
+
+        // check for available IDPs
+        const idpsList = transaction.availableSteps.filter((step) => step.name === 'redirect-idp');
+        showAvailableIdps(idpsList);
+
         break;
       }
 
@@ -205,6 +234,11 @@ function handleTransaction(transaction) {
 }
 
 function setTokens(tokens) {
+  // There may also be a leftover "error" param from the auth flow.
+  // Replace state with the "/" so the page can be reloaded cleanly.
+  // not doing this, will have issues when IDP sets interaction error in URL
+  window.history.replaceState({}, '', '/');
+
   authClient.tokenManager.setTokens(tokens);
 
   authClient.tokenManager.getTokens().then(({ accessToken, idToken }) => {
@@ -312,6 +346,29 @@ function showMFA() {
         throw new Error(`TODO: showMfa handle nextStep: ${nextStep.name}`);
     }
   }
+}
+
+// ================================================== SOCIAL LOGIN ==================================================
+function showAvailableIdps(idpsList) {
+  const containerElement = document.getElementById('idp-button-section');
+  containerElement.style.display = 'block';
+
+  idpsList.forEach(function (elem) {
+    const idpLabel = elem.idp.name;
+    const idpLink = elem.href;
+
+    const el = document.createElement('a');
+    el.setAttribute('href', idpLink);
+    el.setAttribute('class', 'idp-button');
+
+    el.innerHTML = `Login with ${idpLabel}`;
+
+    containerElement.appendChild(el);
+
+    // Add a line break after the anchor tag
+    const br = document.createElement('br');
+    containerElement.appendChild(br);
+  });
 }
 
 function showAuthenticatorVerificationData() {
@@ -942,3 +999,5 @@ function selectMfaFactorForUnlockAccount(e, authenticator) {
 }
 
 // TODO: Add support for password recovery and unlock account with okta verify. currently only email support
+// TODO: Change config handling so that redirect uri and useInteraction code is visible at page load initially
+// TODO: refreshing page after logging in is throwing errors with id token

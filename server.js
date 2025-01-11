@@ -1,16 +1,20 @@
 const express = require('express');
-const path = require('path');
+
 const app = express();
 const port = 3000;
 
-// Serve static files from the 'public' directory
-app.use(express.static(path.join(__dirname, 'public')));
+// preserves query parameters
+function redirectToOrigin(req, res, next) {
+  req.url = '/';
+  next();
+}
 
-// Serve index.html when the root URL is accessed
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
+console.log('Login Redirect URI --> /authorization-code/callback');
+app.get('/authorization-code/callback', redirectToOrigin);
+app.get('/profile', redirectToOrigin);
+
+app.use(express.static('./public'));
 
 app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
+  console.log(`App running at http://localhost:${port}`);
 });

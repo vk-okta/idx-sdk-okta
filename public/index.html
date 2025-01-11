@@ -8,7 +8,7 @@
     <script src="https://global.oktacdn.com/okta-auth-js/7.5.1/okta-auth-js.polyfill.js" type="text/javascript"></script>
     <script src="https://global.oktacdn.com/okta-auth-js/7.5.1/okta-auth-js.min.js" type="text/javascript"></script>
 
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
     <div id="main-container">
@@ -23,6 +23,10 @@
             <input type="email" id="username" name="username" placeholder="Enter your email" />
           </div>
           <button onclick="submitSignInUser()" class="btn primary">Sign In</button>
+
+          <div id="idp-button-section" style="display: none;">
+            <!-- insert idps list dynamically here -->
+          </div>
 
           <div id="forgot-password-section">
             <a id="show-forgot-password" onclick="showForgotPassword(event)">Forgot Password</a>
@@ -329,6 +333,6 @@
       </div>
     </div>
 
-    <script src="script.js"></script>
+    <script src="/script.js" type="text/javascript"></script>
   </body>
 </html>
