@@ -50,11 +50,9 @@ function main() {
   });
 
   const search = window.location.search;
+  // Social/IDP callback
   if (authClient.idx.isInteractionRequired(search)) {
-    console.log('here');
-
-    authClient.idx.proceed().catch(handleTransaction).catch(showError);
-
+    idxProceed();
     return;
   }
 
@@ -68,7 +66,12 @@ function startApp() {
   // authenticated app
   authClient.start();
 
+  // using this to check available idps
   authClient.idx.start().then(handleTransaction).catch(showError);
+}
+
+function idxProceed() {
+  authClient.idx.proceed().then(handleTransaction).catch(showError);
 }
 
 function createAuthClient() {
@@ -204,6 +207,8 @@ function handleTransaction(transaction) {
   switch (transaction.status) {
     case 'PENDING':
       if (transaction.nextStep.name === 'identify') {
+        console.log('identify step found');
+
         // renderDynamicSigninForm(transaction);
 
         // check for available IDPs
