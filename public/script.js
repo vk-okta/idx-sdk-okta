@@ -234,6 +234,11 @@ function handleTransaction(transaction) {
 }
 
 function setTokens(tokens) {
+  // There may also be a leftover "error" param from the auth flow.
+  // Replace state with the "/" so the page can be reloaded cleanly.
+  // not doing this, will have issues when IDP sets interaction error in URL
+  window.history.replaceState({}, '', '/');
+
   authClient.tokenManager.setTokens(tokens);
 
   authClient.tokenManager.getTokens().then(({ accessToken, idToken }) => {
@@ -994,3 +999,5 @@ function selectMfaFactorForUnlockAccount(e, authenticator) {
 }
 
 // TODO: Add support for password recovery and unlock account with okta verify. currently only email support
+// TODO: Change config handling so that redirect uri and useInteraction code is visible at page load initially
+// TODO: refreshing page after logging in is throwing errors with id token
