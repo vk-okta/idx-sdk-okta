@@ -159,7 +159,8 @@ button {
 
 #register-user-section,
 #forgot-password-section,
-#unlock-account-user-section {
+#unlock-account-user-section,
+#idp-button-section  {
   margin-top: 15px;
 }
 
@@ -176,6 +177,14 @@ button {
 #show-unlock-account:hover {
   text-decoration: underline;
   cursor: pointer;
+}
+
+.idp-button {
+  color: #4caf50;
+  font-size: 0.875rem;
+  text-decoration: none;
+  display: inline-block;
+  margin-bottom: 15px;
 }
 
 #logout,
