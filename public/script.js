@@ -49,6 +49,19 @@ function main() {
     renderApp();
   });
 
+  const search = window.location.search;
+  if (authClient.idx.isInteractionRequired(search)) {
+    console.log('here');
+
+    authClient.idx.proceed().catch(handleTransaction).catch(showError);
+
+    return;
+  }
+
+  startApp();
+}
+
+function startApp() {
   // Calculates initial auth state and fires change event for listeners
   // Also starts the token auto-renew service
   // this is needed if you want to refresh the page and stay on the
@@ -319,15 +332,13 @@ function showMFA() {
       case 'select-authenticator-unlock-account':
         showUnlockAccountFormWithRemediators();
         break;
-      case 'redirect-idp':
-        console.log('work');
-        break;
       default:
         throw new Error(`TODO: showMfa handle nextStep: ${nextStep.name}`);
     }
   }
 }
 
+// ================================================== SOCIAL LOGIN ==================================================
 function showAvailableIdps(idpsList) {
   const containerElement = document.getElementById('idp-button-section');
   containerElement.style.display = 'block';
