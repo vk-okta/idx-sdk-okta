@@ -42,6 +42,12 @@ function main() {
   // Subscribe to authState change event. Logic based on authState is done here.
   authClient.authStateManager.subscribe(function (authState) {
     if (!authState.isAuthenticated) {
+      // this I am setting here becuase putting idx.start in startApp() function
+      // is starting the flow on page refresh causing errors
+
+      // using this to check available idps
+      authClient.idx.start().then(handleTransaction).catch(showError);
+
       renderUnAuthenticatedState();
     }
 
@@ -65,9 +71,6 @@ function startApp() {
   // this is needed if you want to refresh the page and stay on the
   // authenticated app
   authClient.start();
-
-  // using this to check available idps
-  authClient.idx.start().then(handleTransaction).catch(showError);
 }
 
 function idxProceed() {
@@ -1000,4 +1003,3 @@ function selectMfaFactorForUnlockAccount(e, authenticator) {
 
 // TODO: Add support for password recovery and unlock account with okta verify. currently only email support
 // TODO: Change config handling so that redirect uri and useInteraction code is visible at page load initially
-// TODO: refreshing page after logging in is throwing errors with id token
