@@ -4,6 +4,9 @@ var config = {
   issuer: 'https://vivek-giri.oktapreview.com/oauth2/ausae177jfbCM7LBp1d7',
   clientId: '0oaehju4utBnhFRvP1d7',
   scopes: ['openid', 'profile', 'offline_access'],
+  redirectUri: 'http://localhost:3000/authorization-code/callback',
+  useInteractionCodeFlow: true,
+  transformAuthState,
 };
 
 async function transformAuthState(oktaAuth, authState) {
@@ -31,8 +34,8 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function main() {
-  // if config object is empty show config form
-  if (Object.keys(config).length === 0) {
+  // if config object does not have issuer and client id
+  if (!config.issuer && !config.clientId) {
     showConfigForm();
     return;
   }
@@ -42,6 +45,12 @@ function main() {
   // Subscribe to authState change event. Logic based on authState is done here.
   authClient.authStateManager.subscribe(function (authState) {
     if (!authState.isAuthenticated) {
+      // this I am setting here becuase putting idx.start in startApp() function
+      // is starting the flow on page refresh causing errors
+
+      // using this to check available idps
+      authClient.idx.start().then(handleTransaction).catch(showError);
+
       renderUnAuthenticatedState();
     }
 
@@ -49,12 +58,7 @@ function main() {
     renderApp();
   });
 
-  const search = window.location.search;
-  // Social/IDP callback
-  if (authClient.idx.isInteractionRequired(search)) {
-    idxProceed();
-    return;
-  }
+  handleIdpCallback();
 
   startApp();
 }
@@ -65,33 +69,15 @@ function startApp() {
   // this is needed if you want to refresh the page and stay on the
   // authenticated app
   authClient.start();
-
-  // using this to check available idps
-  authClient.idx.start().then(handleTransaction).catch(showError);
-}
-
-function idxProceed() {
-  authClient.idx.proceed().then(handleTransaction).catch(showError);
 }
 
 function createAuthClient() {
   try {
-    authClient = new OktaAuth({
-      ...config,
-      redirectUri: 'http://localhost:3000/authorization-code/callback',
-      useInteractionCodeFlow: true,
-      transformAuthState,
-    });
+    authClient = new OktaAuth(config);
 
-    const showConfigData = {
-      ...config,
-      redirectUri: 'http://localhost:3000/authorization-code/callback',
-      useInteractionCodeFlow: true,
-    };
+    sessionStorage.setItem('config', JSON.stringify(config));
 
-    sessionStorage.setItem('config', JSON.stringify(showConfigData));
-
-    document.getElementById('config-section').innerText = stringify(showConfigData);
+    document.getElementById('config-section').innerText = stringify(config);
   } catch (error) {
     showError(error);
     console.log(error);
@@ -369,6 +355,26 @@ function showAvailableIdps(idpsList) {
     const br = document.createElement('br');
     containerElement.appendChild(br);
   });
+}
+
+// Social/IDP callback
+function handleIdpCallback() {
+  // this returns a string
+  const search = window.location.search;
+
+  // Social/IDP callback
+  if (authClient.idx.isInteractionRequired(search)) {
+    return authClient.idx.proceed().then(handleTransaction).catch(showError);
+  }
+
+  // this returns an object on which we can use the has function
+  const searchParams = new URLSearchParams(window.location.search);
+
+  // check if the url has interaction_code, and then proceed
+  if (searchParams.has('interaction_code')) {
+    // handle interactionCode and save tokens
+    return authClient.idx.proceed().then(handleTransaction).catch(showError);
+  }
 }
 
 function showAuthenticatorVerificationData() {
@@ -1000,4 +1006,3 @@ function selectMfaFactorForUnlockAccount(e, authenticator) {
 
 // TODO: Add support for password recovery and unlock account with okta verify. currently only email support
 // TODO: Change config handling so that redirect uri and useInteraction code is visible at page load initially
-// TODO: refreshing page after logging in is throwing errors with id token
