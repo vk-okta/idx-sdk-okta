@@ -59,6 +59,7 @@ function main() {
   });
 
   handleIdpCallback();
+  handleEmailCallback();
 
   startApp();
 }
@@ -374,6 +375,26 @@ function handleIdpCallback() {
   if (searchParams.has('interaction_code')) {
     // handle interactionCode and save tokens
     return authClient.idx.proceed().then(handleTransaction).catch(showError);
+  }
+}
+
+// ================================================== EMAIL CALLBACK ==================================================
+function handleEmailCallback() {
+  const search = window.location.search;
+
+  if (authClient.idx.isEmailVerifyCallback(search)) {
+    try {
+      return authClient.idx.handleEmailVerifyCallback(search).then(handleTransaction).catch(showError);
+    } catch (error) {
+      if (authClient.idx.isEmailVerifyCallbackError(error)) {
+        const { otp, state } = error;
+        console.log('Error in handling email verify callback');
+        console.log(otp, state);
+
+        // can do stuff here like custom handling of callback error
+      }
+      console.log(error.message);
+    }
   }
 }
 
@@ -1005,4 +1026,5 @@ function selectMfaFactorForUnlockAccount(e, authenticator) {
 }
 
 // TODO: Add support for password recovery and unlock account with okta verify. currently only email support
-// TODO: Change config handling so that redirect uri and useInteraction code is visible at page load initially
+// TODO: Add support to resend eligible MFA factors
+// TODO: There is some errors in the opened tab when EVE is used, if the login flow is completed in the new tab, the exisiting tab has UI issues

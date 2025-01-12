@@ -11,6 +11,7 @@ function redirectToOrigin(req, res, next) {
 
 console.log('Login Redirect URI --> /authorization-code/callback');
 app.get('/authorization-code/callback', redirectToOrigin);
+app.get('/magiclink/callback', redirectToOrigin);
 app.get('/profile', redirectToOrigin);
 
 app.use(express.static('./public'));
