@@ -4,6 +4,9 @@ var config = {
   issuer: 'https://vivek-giri.oktapreview.com/oauth2/ausae177jfbCM7LBp1d7',
   clientId: '0oaehju4utBnhFRvP1d7',
   scopes: ['openid', 'profile', 'offline_access'],
+  redirectUri: 'http://localhost:3000/authorization-code/callback',
+  useInteractionCodeFlow: true,
+  transformAuthState,
 };
 
 async function transformAuthState(oktaAuth, authState) {
@@ -31,8 +34,8 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function main() {
-  // if config object is empty show config form
-  if (Object.keys(config).length === 0) {
+  // if config object does not have issuer and client id
+  if (!config.issuer && !config.clientId) {
     showConfigForm();
     return;
   }
@@ -70,22 +73,11 @@ function startApp() {
 
 function createAuthClient() {
   try {
-    authClient = new OktaAuth({
-      ...config,
-      redirectUri: 'http://localhost:3000/authorization-code/callback',
-      useInteractionCodeFlow: true,
-      transformAuthState,
-    });
+    authClient = new OktaAuth(config);
 
-    const showConfigData = {
-      ...config,
-      redirectUri: 'http://localhost:3000/authorization-code/callback',
-      useInteractionCodeFlow: true,
-    };
+    sessionStorage.setItem('config', JSON.stringify(config));
 
-    sessionStorage.setItem('config', JSON.stringify(showConfigData));
-
-    document.getElementById('config-section').innerText = stringify(showConfigData);
+    document.getElementById('config-section').innerText = stringify(config);
   } catch (error) {
     showError(error);
     console.log(error);
