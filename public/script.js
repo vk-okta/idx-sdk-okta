@@ -55,12 +55,7 @@ function main() {
     renderApp();
   });
 
-  const search = window.location.search;
-  // Social/IDP callback
-  if (authClient.idx.isInteractionRequired(search)) {
-    idxProceed();
-    return;
-  }
+  handleIdpCallback();
 
   startApp();
 }
@@ -71,10 +66,6 @@ function startApp() {
   // this is needed if you want to refresh the page and stay on the
   // authenticated app
   authClient.start();
-}
-
-function idxProceed() {
-  authClient.idx.proceed().then(handleTransaction).catch(showError);
 }
 
 function createAuthClient() {
@@ -372,6 +363,26 @@ function showAvailableIdps(idpsList) {
     const br = document.createElement('br');
     containerElement.appendChild(br);
   });
+}
+
+// Social/IDP callback
+function handleIdpCallback() {
+  // this returns a string
+  const search = window.location.search;
+
+  // Social/IDP callback
+  if (authClient.idx.isInteractionRequired(search)) {
+    return authClient.idx.proceed().then(handleTransaction).catch(showError);
+  }
+
+  // this returns an object on which we can use the has function
+  const searchParams = new URLSearchParams(window.location.search);
+
+  // check if the url has interaction_code, and then proceed
+  if (searchParams.has('interaction_code')) {
+    // handle interactionCode and save tokens
+    return authClient.idx.proceed().then(handleTransaction).catch(showError);
+  }
 }
 
 function showAuthenticatorVerificationData() {
