@@ -261,6 +261,10 @@ function stringify(obj) {
   return JSON.stringify(obj, null, 2);
 }
 
+function capitalizeFirstWord(str) {
+  return str.trim().charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+}
+
 function updateAppState(props) {
   Object.assign(appState, props);
   document.getElementById('transaction-section').innerText = stringify(appState.transaction?.nextStep || appState.transaction || {});
@@ -329,6 +333,9 @@ function showMFA() {
       case 'select-authenticator-unlock-account':
         showUnlockAccountFormWithRemediators();
         break;
+      case 'redirect-idp':
+        showAndRedirectToIDP();
+        break;
       default:
         throw new Error(`TODO: showMfa handle nextStep: ${nextStep.name}`);
     }
@@ -376,6 +383,15 @@ function handleIdpCallback() {
     // handle interactionCode and save tokens
     return authClient.idx.proceed().then(handleTransaction).catch(showError);
   }
+}
+
+function showAndRedirectToIDP() {
+  const nextStep = appState.transaction.nextStep;
+
+  document.getElementById('redirect-section').style.display = 'block';
+  document.getElementById('redirect-section').innerText = `Redirecting to ${capitalizeFirstWord(nextStep.type)} for Authentication`;
+
+  window.location.replace(nextStep.href);
 }
 
 // ================================================== EMAIL CALLBACK ==================================================
