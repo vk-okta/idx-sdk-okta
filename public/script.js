@@ -966,12 +966,10 @@ function showUnlockAccountForm(e) {
 function submitUnlockAccount(e) {
   document.getElementById('unlock-account-form').style.display = 'none';
 
-  // const username = document.getElementById('unlock-account-username').value.trim();
-  const username = 'vivek.giri+newacc@okta.com';
+  const username = document.getElementById('unlock-account-username').value.trim();
 
   updateAppState({ username });
 
-  // this will need reviewing based on the JIRA https://oktainc.atlassian.net/browse/OKTA-848066
   authClient.idx.unlockAccount({ username }).then(handleTransaction).catch(showError);
 }
 
@@ -979,7 +977,6 @@ function showUnlockAccountFormWithRemediators() {
   document.getElementById('unlock-account-with-rmd-form').style.display = 'block';
 
   // dynamically inserting the username because as of now in Okta username is needed
-  // in Okta SIW as of now the username is needed
   document.getElementById('unlock-account-username-with-rmd').value = appState.username;
 
   const mfaList = appState.transaction.nextStep.inputs[1].options;
@@ -1021,7 +1018,6 @@ function selectMfaFactorForUnlockAccount(e, authenticator) {
 
   hideMfaUnlockList();
 
-  // the username needs to be passed as of now
   authClient.idx.proceed({ username: appState.username, authenticator }).then(handleTransaction).catch(showError);
 }
 
