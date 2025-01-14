@@ -1049,6 +1049,7 @@ function showUnlockAccountFormWithRemediators() {
 
   // dynamically inserting the username because as of now in Okta username is needed
   document.getElementById('unlock-account-username-with-rmd').value = appState.username;
+  document.getElementById('unlock-account-username-with-rmd').disabled = true;
 
   const mfaList = appState.transaction.nextStep.inputs[1].options;
 
@@ -1092,6 +1093,6 @@ function selectMfaFactorForUnlockAccount(e, authenticator) {
   authClient.idx.proceed({ username: appState.username, authenticator }).then(handleTransaction).catch(showError);
 }
 
-// TODO: Add support for password recovery and unlock account with okta verify. currently only email support
+// TODO: Add support for password recovery with okta verify. currently only email support
 // TODO: Add support for phone factor
 // TODO: Move Forgot password option to the Password page
