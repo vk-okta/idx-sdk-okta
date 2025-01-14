@@ -132,7 +132,10 @@
             <label for="email-code">Enter the code:</label>
             <input name="email-code" type="text" placeholder="Enter your code" />
           </div>
-          <button id="mfa-submit" onclick="submitMfa(event)" class="btn primary">Submit</button>
+          <div class="form-button-section">
+            <button onclick="submitMfa(event)" class="btn primary">Submit</button>
+            <button onclick="resendMfa(event)" class="btn">Resend</button>
+          </div>
         </div>
 
         <div id="send-sms-section" class="form-section" style="display: none">
@@ -234,7 +237,10 @@
             <label for="enroll-email-code">Enter the code:</label>
             <input name="enroll-email-code" type="text" placeholder="Enter your code" />
           </div>
-          <button id="mfa-submit" onclick="submitMfa(event)" class="btn primary">Submit</button>
+          <div class="form-button-section">
+            <button onclick="submitMfa(event)" class="btn primary">Submit</button>
+            <button onclick="resendMfa(event)" class="btn">Resend</button>
+          </div>
         </div>
 
         <div id="enroll-mfa-password-section" class="form-section" style="display: none">

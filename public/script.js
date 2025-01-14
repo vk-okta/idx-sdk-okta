@@ -317,7 +317,7 @@ function showMFA() {
     const nextStep = transaction.nextStep;
 
     const messages = transaction?.messages;
-    const key = messages && messages[0].i18n.key
+    const key = messages && messages[0].i18n.key;
 
     // If Password Reset is not supported by ORG
     if (key === 'oie.selfservice.reset.password.not.allowed') {
@@ -695,6 +695,16 @@ function submitChallengeAppCode() {
   authClient.idx.proceed({ verificationCode: passCode }).then(handleTransaction).catch(showError);
 }
 
+function resendMfa() {
+  const canResend = appState.transaction.nextStep?.canResend;
+
+  if (!canResend) {
+    return;
+  }
+
+  authClient.idx.proceed({ resend: true }).then(handleTransaction).catch(showError);
+}
+
 // ======================================================== ENROLL MFA FACTORS LIST ========================================================
 function showMfaEnrollFactors() {
   const mfaList = appState.transaction.nextStep.inputs[0].options;
@@ -1060,4 +1070,6 @@ function selectMfaFactorForUnlockAccount(e, authenticator) {
 }
 
 // TODO: Add support for password recovery and unlock account with okta verify. currently only email support
-// TODO: Add support to resend eligible MFA factors
+// TODO: Add support for phone factor
+// TODO: Move Forgot password option to the Password page
+// TODO: Add a home link that takes you to home page during login
