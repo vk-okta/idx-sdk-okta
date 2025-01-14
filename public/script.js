@@ -776,6 +776,10 @@ function showEnrollEmail() {
 
 function showEnrollPassword() {
   document.getElementById('enroll-mfa-password-section').style.display = 'block';
+
+  // the password rules is stored in authenticator
+  const authenticator = appState.transaction.nextStep.authenticator;
+  showPasswordRules(authenticator.settings);
 }
 
 function submitEnrollAuthenticator() {

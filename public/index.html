@@ -190,16 +190,21 @@
         <div id="list-enroll-mfa-section" class="form-section" style="display: none">
           <label>Enroll in MFA</label>
           <!-- dynamically insert mfa list -->
-          <button id="enroll-skip-btn" onclick="submitSkipEnroll()" style="display: none;">Skip</button>
+          <button id="enroll-skip-btn" onclick="submitSkipEnroll()" style="display: none">Skip</button>
         </div>
 
-        <div id="authenticator-enroll-mfa-section" class="form-section" style="display: none;">
+        <div id="authenticator-enroll-mfa-section" class="form-section" style="display: none">
           <label for="methodType">Select a method type:</label>
           <select name="methodType">
             <!-- methodTypes are dynamically inserted here -->
           </select>
           <label for="enrollment-phone-number">Enter your Phone Number</label>
-          <input type="text" id="enrollment-phone-number" name="enrollment-phone-number" placeholder="Enter your Phone Number with Country code (+9178**** / +41889****x876)" />
+          <input
+            type="text"
+            id="enrollment-phone-number"
+            name="enrollment-phone-number"
+            placeholder="Enter your Phone Number with Country code (+9178**** / +41889****x876)"
+          />
           <button id="mfa-submit" onclick="submitMfa(event)" class="btn primary">Submit</button>
         </div>
 
@@ -227,6 +232,12 @@
         </div>
 
         <div id="enroll-mfa-password-section" class="form-section" style="display: none">
+          <div id="password-rules-group" style="display: none">
+            <label>Password Rules</label>
+            <div class="list-password-rules">
+              <!-- append password rules here -->
+            </div>
+          </div>
           <div class="input-group">
             <label for="enroll-password">Password</label>
             <input type="password" id="enroll-password" name="enroll-password" placeholder="Enter your new password" />
