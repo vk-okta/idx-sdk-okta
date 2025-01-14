@@ -324,6 +324,9 @@ function showMFA() {
       case 'select-authenticator-enroll':
         showMfaEnrollFactors();
         break;
+      case 'authenticator-enrollment-data':
+        showAuthenticatorEnrollmentData();
+        break;
       case 'enroll-authenticator':
         showMfaEnrollmentForm();
         break;
@@ -477,6 +480,10 @@ function submitMfa() {
     return submitAuthenticatorVerificationData();
   }
 
+  if (nextStep.name === 'authenticator-enrollment-data') {
+    return submitAuthenticatorEnrollmentData();
+  }
+
   // use the passcode sent in the email to further resume the transaction
   if (nextStep.name === 'challenge-authenticator') {
     return submitChallengeAuthenticator();
@@ -518,7 +525,6 @@ function submitAuthenticatorVerificationData() {
 
   throw new Error(`TODO: handle submit authenticator-verification-data for authenticator type ${authenticator.type}`);
 }
-
 function submitAuthenticatorVerificationDataEmail() {
   document.getElementById('authenticator-verification-data-email-section').style.display = 'none';
 
@@ -679,9 +685,11 @@ function resendMfa() {
 
 // ======================================================== ENROLL MFA FACTORS LIST ========================================================
 function showMfaEnrollFactors() {
-  const mfaList = appState.transaction.nextStep.inputs[0].options;
-  const canSkip = appState.transaction.nextStep.canSkip;
   // mfaList = [{label: 'Email', value: 'okta_email'}, {label: 'Password', value: 'okta_password'}]
+  const mfaList = appState.transaction.nextStep.inputs[0].options;
+
+  const canSkip = appState.transaction.nextStep.canSkip;
+  if (canSkip) document.getElementById('enroll-skip-btn').style.display = 'block';
 
   const containerElement = document.getElementById('list-enroll-mfa-section');
   containerElement.style.display = 'block';
@@ -697,8 +705,7 @@ function showMfaEnrollFactors() {
     el.innerHTML = `
     <div class="factor">
       <span>${mfaLabel}</span>
-      ${canSkip ? `<button class="skip-verify-button" onclick="skipMfaFactorForEnrollment(event)">Skip</button>` : ``} 
-      <button class="verify-button" onclick="selectMfaFactorForEnrollment(event, '${mfaVal}')">Verify</button>
+      <button class="verify-button" onclick="selectMfaFactorForEnrollment(event, '${mfaVal}')">Enroll</button>
     </div>
   `;
 
@@ -721,7 +728,7 @@ function selectMfaFactorForEnrollment(e, authenticator) {
   authClient.idx.proceed({ authenticator }).then(handleTransaction).catch(showError);
 }
 
-function skipMfaFactorForEnrollment(e) {
+function submitSkipEnroll(e) {
   hideMfaEnroll();
 
   authClient.idx.proceed({ skip: true }).then(handleTransaction).catch(showError);
@@ -737,7 +744,7 @@ function showMfaEnrollmentForm() {
     return showEnrollSecurityQuestion(authenticator);
   }
 
-  if (authenticator.type === 'email') {
+  if (authenticator.type === 'email' || authenticator.type === 'phone') {
     return showEnrollEmail();
   }
 
@@ -769,6 +776,10 @@ function showEnrollEmail() {
 
 function showEnrollPassword() {
   document.getElementById('enroll-mfa-password-section').style.display = 'block';
+
+  // the password rules is stored in authenticator
+  const authenticator = appState.transaction.nextStep.authenticator;
+  showPasswordRules(authenticator.settings);
 }
 
 function submitEnrollAuthenticator() {
@@ -778,7 +789,7 @@ function submitEnrollAuthenticator() {
     return submitEnrollChallengeQuestion();
   }
 
-  if (authenticator.type === 'email') {
+  if (authenticator.type === 'email' || authenticator.type === 'phone') {
     return submitEnrollChallengeEmail();
   }
 
@@ -818,6 +829,49 @@ function submitEnrollChallengePassword() {
   document.getElementById('enroll-mfa-password-section').style.display = 'none';
 
   authClient.idx.proceed({ password: newPass }).then(handleTransaction).catch(showError);
+}
+
+function showAuthenticatorEnrollmentData() {
+  const authenticator = appState.transaction.nextStep.authenticator;
+
+  if (authenticator.type === 'phone') {
+    return showAuthenticatorEnrollmentPhone();
+  }
+
+  throw new Error(`TODO: handle authenticator-enrollment-data for authenticator type ${authenticator.type}`);
+}
+
+function showAuthenticatorEnrollmentPhone() {
+  document.getElementById('authenticator-enroll-mfa-section').style.display = 'block';
+
+  const options = appState.transaction.nextStep.inputs[0].options;
+
+  const selectElem = document.querySelector('#authenticator-enroll-mfa-section select[name=methodType]');
+
+  options.forEach(function (option) {
+    const el = document.createElement('option');
+    el.setAttribute('value', option.value);
+    el.innerText = option.label;
+    selectElem.appendChild(el);
+  });
+}
+
+function hideAuthEnrollList() {
+  // Get the select element
+  const selectElem = document.querySelector('#authenticator-enroll-mfa-section select[name=methodType]');
+
+  // Clear any existing options, this will remove all options
+  selectElem.innerHTML = '';
+}
+
+function submitAuthenticatorEnrollmentData() {
+  const methodType = document.querySelector('#authenticator-enroll-mfa-section select[name=methodType]').value;
+  const phoneNumber = document.querySelector('#authenticator-enroll-mfa-section input[name=enrollment-phone-number]').value.trim();
+
+  document.getElementById('authenticator-enroll-mfa-section').style.display = 'none';
+  hideAuthEnrollList();
+
+  authClient.idx.proceed({ methodType, phoneNumber }).then(handleTransaction).catch(showError);
 }
 
 // ======================================================== MFA REQUIRED ========================================================
