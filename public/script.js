@@ -679,9 +679,11 @@ function resendMfa() {
 
 // ======================================================== ENROLL MFA FACTORS LIST ========================================================
 function showMfaEnrollFactors() {
-  const mfaList = appState.transaction.nextStep.inputs[0].options;
-  const canSkip = appState.transaction.nextStep.canSkip;
   // mfaList = [{label: 'Email', value: 'okta_email'}, {label: 'Password', value: 'okta_password'}]
+  const mfaList = appState.transaction.nextStep.inputs[0].options;
+
+  const canSkip = appState.transaction.nextStep.canSkip;
+  if (canSkip) document.getElementById('enroll-skip-btn').style.display = 'block';
 
   const containerElement = document.getElementById('list-enroll-mfa-section');
   containerElement.style.display = 'block';
@@ -697,8 +699,7 @@ function showMfaEnrollFactors() {
     el.innerHTML = `
     <div class="factor">
       <span>${mfaLabel}</span>
-      ${canSkip ? `<button class="skip-verify-button" onclick="skipMfaFactorForEnrollment(event)">Skip</button>` : ``} 
-      <button class="verify-button" onclick="selectMfaFactorForEnrollment(event, '${mfaVal}')">Verify</button>
+      <button class="verify-button" onclick="selectMfaFactorForEnrollment(event, '${mfaVal}')">Enroll</button>
     </div>
   `;
 
@@ -721,7 +722,7 @@ function selectMfaFactorForEnrollment(e, authenticator) {
   authClient.idx.proceed({ authenticator }).then(handleTransaction).catch(showError);
 }
 
-function skipMfaFactorForEnrollment(e) {
+function submitSkipEnroll(e) {
   hideMfaEnroll();
 
   authClient.idx.proceed({ skip: true }).then(handleTransaction).catch(showError);
@@ -968,9 +969,12 @@ function showRegistrationForm(e) {
 function submitRegisterNewUser(e) {
   document.getElementById('register-new-user-form').style.display = 'none';
 
-  const email = document.getElementById('new-user-email').value.trim();
-  const firstName = document.getElementById('new-user-fname').value.trim();
-  const lastName = document.getElementById('new-user-lname').value.trim();
+  // const email = document.getElementById('new-user-email').value.trim();
+  // const firstName = document.getElementById('new-user-fname').value.trim();
+  // const lastName = document.getElementById('new-user-lname').value.trim();
+  const email = 'vivek.giri+newac@okta.com';
+  const firstName = 'test';
+  const lastName = 'ac';
 
   updateAppState({ username: email });
 

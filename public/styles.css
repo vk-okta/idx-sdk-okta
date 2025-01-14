@@ -108,6 +108,14 @@ button {
   margin-top: 10px;
 }
 
+.factor {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 5px;
+}
+
 .btn.primary,
 .verify-button {
   background-color: #4caf50;
@@ -147,14 +155,6 @@ button {
   font-family: monospace;
   word-wrap: break-word;
   max-width: 70%;
-}
-
-.factor {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-bottom: 5px;
 }
 
 #register-user-section,
