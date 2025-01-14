@@ -13,6 +13,7 @@
   <body>
     <div id="main-container">
       <div id="siw-section">
+        <a id="back-to-home" onclick="backToHome()">Go to Home</a>
         <div id="sign-in-form" class="form-section" style="display: none">
           <div class="input-group">
             <div style="display: flex; justify-content: space-between; align-items: center">
@@ -32,10 +33,10 @@
             <a id="show-forgot-password" onclick="showForgotPassword(event)">Forgot Password</a>
           </div>
 
-          <div id="register-user-section">
+          <div id="register-user-section" style="display: none;">
             <a id="show-register-user" onclick="showRegistrationForm(event)">Register New User</a>
           </div>
-          <div id="unlock-account-user-section">
+          <div id="unlock-account-user-section" style="display: none;">
             <a id="show-unlock-account" onclick="showUnlockAccountForm(event)">Unlock Account</a>
           </div>
         </div>
@@ -56,13 +57,13 @@
           </div>
         </div>
 
-        <div id="dynamic-signin-form-section" style="display: none" class="form-section">
+        <!-- <div id="dynamic-signin-form-section" style="display: none" class="form-section">
           <div class="input-group dynamic-username-group" style="display: none">
             <label for="dynamic-username">Username</label>
             <input name="dynamic-username" type="email" />
           </div>
           <button class="btn primary" onclick="submitDynamicSigninForm(event)">Continue</button>
-        </div>
+        </div> -->
 
         <div id="forgot-password-form" class="form-section" style="display: none">
           <label>Reset Password</label>
@@ -132,7 +133,10 @@
             <label for="email-code">Enter the code:</label>
             <input name="email-code" type="text" placeholder="Enter your code" />
           </div>
-          <button id="mfa-submit" onclick="submitMfa(event)" class="btn primary">Submit</button>
+          <div class="form-button-section">
+            <button onclick="submitMfa(event)" class="btn primary">Submit</button>
+            <button onclick="resendMfa(event)" class="btn">Resend</button>
+          </div>
         </div>
 
         <div id="send-sms-section" class="form-section" style="display: none">
@@ -234,7 +238,10 @@
             <label for="enroll-email-code">Enter the code:</label>
             <input name="enroll-email-code" type="text" placeholder="Enter your code" />
           </div>
-          <button id="mfa-submit" onclick="submitMfa(event)" class="btn primary">Submit</button>
+          <div class="form-button-section">
+            <button onclick="submitMfa(event)" class="btn primary">Submit</button>
+            <button onclick="resendMfa(event)" class="btn">Resend</button>
+          </div>
         </div>
 
         <div id="enroll-mfa-password-section" class="form-section" style="display: none">
@@ -276,6 +283,10 @@
           </div>
           <label style="color: red; display: none" class="password-validation-error"></label>
           <button id="mfa-submit" onclick="submitMfa(event)" class="btn primary">Submit</button>
+        </div>
+
+        <div id="redirect-section" class="form-section" style="display: none;">
+          <!-- show where it redirects to IDP -->
         </div>
 
         <div id="auth-section" class="auth-section" style="display: none">

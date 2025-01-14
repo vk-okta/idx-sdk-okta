@@ -48,7 +48,7 @@ function main() {
       // this I am setting here becuase putting idx.start in startApp() function
       // is starting the flow on page refresh causing errors
 
-      // using this to check available idps
+      // using this to check available idps and enabled features
       authClient.idx.start().then(handleTransaction).catch(showError);
 
       renderUnAuthenticatedState();
@@ -105,6 +105,8 @@ function renderApp() {
 
 function renderAuthenticatedState(authState) {
   hideSigninForm();
+  hideBackToHome();
+
   document.getElementById('auth-section').style.display = 'block';
   document.getElementById('accessToken').innerText = stringify(authState.accessToken);
 
@@ -148,43 +150,43 @@ function submitSignInUser() {
   authClient.idx.authenticate({ username }).then(handleTransaction).catch(showError);
 }
 
-function renderDynamicSigninForm(transaction) {
-  document.getElementById('dynamic-signin-form-section').style.display = 'block';
-  hideSigninForm();
+// function renderDynamicSigninForm(transaction) {
+//   document.getElementById('dynamic-signin-form-section').style.display = 'block';
+//   hideSigninForm();
 
-  const inputs = transaction.nextStep.inputs;
+//   const inputs = transaction.nextStep.inputs;
 
-  // set the display to block of all the sections present in the inputs array
-  if (inputs.some((input) => input.name === 'username')) {
-    document.querySelector('#dynamic-signin-form-section .dynamic-username-group').style.display = 'block';
-  }
+//   // set the display to block of all the sections present in the inputs array
+//   if (inputs.some((input) => input.name === 'username')) {
+//     document.querySelector('#dynamic-signin-form-section .dynamic-username-group').style.display = 'block';
+//   }
 
-  // submitDynamicFormAuto();
-}
+//   // submitDynamicFormAuto();
+// }
 
-function submitDynamicFormAuto() {
-  // FIXME: BIG RED FLAG, Ideally imo the identify-step should not be there
-  // TRY TO AVOID THE FLOW COMING HERE LIKE A PLAGUE
-  // here I am using the username stored in the appstate
-  const storedUsername = appState.username;
+// function submitDynamicFormAuto() {
+//   // FIXME: BIG RED FLAG, Ideally imo the identify-step should not be there
+//   // TRY TO AVOID THE FLOW COMING HERE LIKE A PLAGUE
+//   // here I am using the username stored in the appstate
+//   const storedUsername = appState.username;
 
-  if (!storedUsername) return;
+//   if (!storedUsername) return;
 
-  console.log('Using username stored in the appstate to skip the identify-step');
+//   console.log('Using username stored in the appstate to skip the identify-step');
 
-  // submit the form with the stored username
-  submitDynamicSigninForm({}, storedUsername);
-}
+//   // submit the form with the stored username
+//   submitDynamicSigninForm({}, storedUsername);
+// }
 
-function submitDynamicSigninForm(event, storedUser) {
-  document.getElementById('dynamic-signin-form-section').style.display = 'none';
+// function submitDynamicSigninForm(event, storedUser) {
+//   document.getElementById('dynamic-signin-form-section').style.display = 'none';
 
-  const username = storedUser
-    ? storedUser
-    : document.querySelector('#dynamic-signin-form-section input[name=dynamic-username]').value.trim();
+//   const username = storedUser
+//     ? storedUser
+//     : document.querySelector('#dynamic-signin-form-section input[name=dynamic-username]').value.trim();
 
-  return authClient.idx.proceed({ username }).then(handleTransaction).catch(showError);
-}
+//   return authClient.idx.proceed({ username }).then(handleTransaction).catch(showError);
+// }
 
 function handleTransaction(transaction) {
   console.log(transaction);
@@ -196,11 +198,8 @@ function handleTransaction(transaction) {
       if (transaction.nextStep.name === 'identify') {
         console.log('identify step found');
 
-        // renderDynamicSigninForm(transaction);
-
-        // check for available IDPs
-        const idpsList = transaction.availableSteps.filter((step) => step.name === 'redirect-idp');
-        showAvailableIdps(idpsList);
+        showSignInFormSection;
+        checkAvailableFeatures(transaction); // check for available features
 
         break;
       }
@@ -215,6 +214,11 @@ function handleTransaction(transaction) {
       setTokens(transaction.tokens);
       updateAppState({ transaction });
       break;
+
+    case 'CANCELED':
+      cancelTransaction();
+      break;
+
     default:
       throw new Error('TODO: add handling for ' + transaction.status + ' status');
   }
@@ -261,6 +265,10 @@ function stringify(obj) {
   return JSON.stringify(obj, null, 2);
 }
 
+function capitalizeFirstWord(str) {
+  return str.trim().charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+}
+
 function updateAppState(props) {
   Object.assign(appState, props);
   document.getElementById('transaction-section').innerText = stringify(appState.transaction?.nextStep || appState.transaction || {});
@@ -293,11 +301,52 @@ function renderUserInfo(userInfo) {
   document.getElementById('userInfo').innerText = stringify(userInfo);
 }
 
+// ============================================ CANCEL TRANSACTION ==============================================
+function hideBackToHome() {
+  document.getElementById('back-to-home').style.display = 'none';
+}
+
+function backToHome() {
+  if (!authClient) return;
+
+  authClient.idx.cancel().then(handleTransaction).catch(showError);
+}
+
+function cancelTransaction() {
+  window.history.replaceState({}, '', '/');
+  window.location.reload();
+}
+
+function checkAvailableFeatures(transaction) {
+  // show the list of all IDPS available
+  const idpsList = transaction.availableSteps.filter((step) => step.name === 'redirect-idp');
+  showAvailableIdps(idpsList);
+
+  const features = transaction.enabledFeatures;
+  features.forEach((elem) => {
+    // only show unlock-account if available based on the app / org policy configuration.
+    if (elem === 'unlock-account') {
+      document.getElementById('unlock-account-user-section').style.display = 'block';
+    } else if (elem === 'enroll-profile') {
+      document.getElementById('register-user-section').style.display = 'block';
+    }
+  });
+}
+
 function showMFA() {
   const transaction = appState.transaction;
 
   if (transaction.status === 'PENDING') {
     const nextStep = transaction.nextStep;
+
+    const messages = transaction?.messages;
+    const key = messages && messages[0].i18n.key;
+
+    // If Password Reset is not supported by ORG
+    if (key === 'oie.selfservice.reset.password.not.allowed') {
+      return;
+    }
+
     switch (nextStep.name) {
       case 'authenticator-verification-data':
         showAuthenticatorVerificationData();
@@ -328,6 +377,9 @@ function showMFA() {
         break;
       case 'select-authenticator-unlock-account':
         showUnlockAccountFormWithRemediators();
+        break;
+      case 'redirect-idp':
+        showAndRedirectToIDP();
         break;
       default:
         throw new Error(`TODO: showMfa handle nextStep: ${nextStep.name}`);
@@ -376,6 +428,15 @@ function handleIdpCallback() {
     // handle interactionCode and save tokens
     return authClient.idx.proceed().then(handleTransaction).catch(showError);
   }
+}
+
+function showAndRedirectToIDP() {
+  const nextStep = appState.transaction.nextStep;
+
+  document.getElementById('redirect-section').style.display = 'block';
+  document.getElementById('redirect-section').innerText = `Redirecting to ${capitalizeFirstWord(nextStep.type)} for Authentication`;
+
+  window.location.replace(nextStep.href);
 }
 
 // ================================================== EMAIL CALLBACK ==================================================
@@ -655,6 +716,16 @@ function submitChallengeAppCode() {
   const passCode = document.querySelector('#okta-verify-passcode-section input[name=okta-verify-passcode]').value;
 
   authClient.idx.proceed({ verificationCode: passCode }).then(handleTransaction).catch(showError);
+}
+
+function resendMfa() {
+  const canResend = appState.transaction.nextStep?.canResend;
+
+  if (!canResend) {
+    return;
+  }
+
+  authClient.idx.proceed({ resend: true }).then(handleTransaction).catch(showError);
 }
 
 // ======================================================== ENROLL MFA FACTORS LIST ========================================================
@@ -966,12 +1037,10 @@ function showUnlockAccountForm(e) {
 function submitUnlockAccount(e) {
   document.getElementById('unlock-account-form').style.display = 'none';
 
-  // const username = document.getElementById('unlock-account-username').value.trim();
-  const username = 'vivek.giri+newacc@okta.com';
+  const username = document.getElementById('unlock-account-username').value.trim();
 
   updateAppState({ username });
 
-  // this will need reviewing based on the JIRA https://oktainc.atlassian.net/browse/OKTA-848066
   authClient.idx.unlockAccount({ username }).then(handleTransaction).catch(showError);
 }
 
@@ -979,7 +1048,6 @@ function showUnlockAccountFormWithRemediators() {
   document.getElementById('unlock-account-with-rmd-form').style.display = 'block';
 
   // dynamically inserting the username because as of now in Okta username is needed
-  // in Okta SIW as of now the username is needed
   document.getElementById('unlock-account-username-with-rmd').value = appState.username;
 
   const mfaList = appState.transaction.nextStep.inputs[1].options;
@@ -1021,10 +1089,9 @@ function selectMfaFactorForUnlockAccount(e, authenticator) {
 
   hideMfaUnlockList();
 
-  // the username needs to be passed as of now
   authClient.idx.proceed({ username: appState.username, authenticator }).then(handleTransaction).catch(showError);
 }
 
 // TODO: Add support for password recovery and unlock account with okta verify. currently only email support
-// TODO: Add support to resend eligible MFA factors
-// TODO: There is some errors in the opened tab when EVE is used, if the login flow is completed in the new tab, the exisiting tab has UI issues
+// TODO: Add support for phone factor
+// TODO: Move Forgot password option to the Password page
