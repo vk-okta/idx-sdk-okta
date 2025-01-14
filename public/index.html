@@ -193,6 +193,16 @@
           <button id="enroll-skip-btn" onclick="submitSkipEnroll()" style="display: none;">Skip</button>
         </div>
 
+        <div id="authenticator-enroll-mfa-section" class="form-section" style="display: none;">
+          <label for="methodType">Select a method type:</label>
+          <select name="methodType">
+            <!-- methodTypes are dynamically inserted here -->
+          </select>
+          <label for="enrollment-phone-number">Enter your Phone Number</label>
+          <input type="text" id="enrollment-phone-number" name="enrollment-phone-number" placeholder="Enter your Phone Number with Country code (+9178**** / +41889****x876)" />
+          <button id="mfa-submit" onclick="submitMfa(event)" class="btn primary">Submit</button>
+        </div>
+
         <div id="enroll-mfa-question-section" class="form-section" style="display: none">
           <div class="input-group">
             <label for="enroll-questions">Choose a question:</label>
