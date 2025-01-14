@@ -152,44 +152,6 @@ function submitSignInUser() {
   authClient.idx.authenticate({ username }).then(handleTransaction).catch(showError);
 }
 
-// function renderDynamicSigninForm(transaction) {
-//   document.getElementById('dynamic-signin-form-section').style.display = 'block';
-//   hideSigninForm();
-
-//   const inputs = transaction.nextStep.inputs;
-
-//   // set the display to block of all the sections present in the inputs array
-//   if (inputs.some((input) => input.name === 'username')) {
-//     document.querySelector('#dynamic-signin-form-section .dynamic-username-group').style.display = 'block';
-//   }
-
-//   // submitDynamicFormAuto();
-// }
-
-// function submitDynamicFormAuto() {
-//   // FIXME: BIG RED FLAG, Ideally imo the identify-step should not be there
-//   // TRY TO AVOID THE FLOW COMING HERE LIKE A PLAGUE
-//   // here I am using the username stored in the appstate
-//   const storedUsername = appState.username;
-
-//   if (!storedUsername) return;
-
-//   console.log('Using username stored in the appstate to skip the identify-step');
-
-//   // submit the form with the stored username
-//   submitDynamicSigninForm({}, storedUsername);
-// }
-
-// function submitDynamicSigninForm(event, storedUser) {
-//   document.getElementById('dynamic-signin-form-section').style.display = 'none';
-
-//   const username = storedUser
-//     ? storedUser
-//     : document.querySelector('#dynamic-signin-form-section input[name=dynamic-username]').value.trim();
-
-//   return authClient.idx.proceed({ username }).then(handleTransaction).catch(showError);
-// }
-
 function handleTransaction(transaction) {
   console.log(transaction);
 
