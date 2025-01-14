@@ -173,6 +173,14 @@ button {
   font-size: 0.875rem;
 }
 
+#back-to-home {
+  position: fixed;
+  top: 0;      
+  left: 0;
+  padding: 20px;
+  margin: 10px;
+}
+
 #show-register-user:hover,
 #show-forgot-password:hover,
 #show-unlock-account:hover,
