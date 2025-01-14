@@ -1,8 +1,10 @@
 let authClient = {};
 var appState = {};
 var config = {
-  issuer: 'https://vivek-giri.oktapreview.com/oauth2/ausae177jfbCM7LBp1d7',
-  clientId: '0oaehju4utBnhFRvP1d7',
+  // issuer: 'https://vivek-giri.oktapreview.com/oauth2/ausae177jfbCM7LBp1d7',
+  // clientId: '0oaehju4utBnhFRvP1d7',
+  issuer: 'https://hiconlabs.oktapreview.com/oauth2/aus9oi7lq0TVc1h581d7',
+  clientId: '0oaddhr715zGZVMv81d7',
   scopes: ['openid', 'profile', 'offline_access'],
   redirectUri: 'http://localhost:3000/authorization-code/callback',
   useInteractionCodeFlow: true,
@@ -544,7 +546,7 @@ function submitMfa() {
 function submitAuthenticatorVerificationData() {
   const authenticator = appState.transaction.nextStep.authenticator;
 
-  if (authenticator.type === 'email') {
+  if (authenticator.type === 'email' || authenticator.type === 'phone') {
     return submitAuthenticatorVerificationDataEmail();
   }
 
@@ -587,13 +589,9 @@ function submitChallengePoll() {
 function showMfaChallenge() {
   const authenticator = appState.transaction.nextStep.authenticator;
 
-  if (authenticator.type === 'email') {
+  if (authenticator.type === 'email' || authenticator.type === 'phone') {
     // show the input to enter the passcode
     document.getElementById('email-code-section').style.display = 'block';
-  }
-
-  if (authenticator.type === 'phone') {
-    document.getElementById('phone-code-section').style.display = 'block';
   }
 
   if (authenticator.type === 'password') {
@@ -653,12 +651,8 @@ function submitEnrollPoll() {
 function submitChallengeAuthenticator() {
   const authenticator = appState.transaction.nextStep.authenticator;
 
-  if (authenticator.type === 'email') {
+  if (authenticator.type === 'email' || authenticator.type === 'phone') {
     return submitChallengeEmail();
-  }
-
-  if (authenticator.type === 'phone') {
-    return submitChallengePhone();
   }
 
   if (authenticator.type === 'password') {
@@ -685,13 +679,6 @@ function submitChallengeEmail() {
   document.getElementById('email-code-section').style.display = 'none';
 
   const passCode = document.querySelector('#email-code-section input[name=email-code]').value;
-
-  authClient.idx.proceed({ verificationCode: passCode }).then(handleTransaction).catch(showError);
-}
-function submitChallengePhone() {
-  document.getElementById('sms-code-section').style.display = 'none';
-
-  const passCode = document.querySelector('#sms-code-section input[name=sms-code]').value;
 
   authClient.idx.proceed({ verificationCode: passCode }).then(handleTransaction).catch(showError);
 }
@@ -1094,5 +1081,4 @@ function selectMfaFactorForUnlockAccount(e, authenticator) {
 }
 
 // TODO: Add support for password recovery with okta verify. currently only email support
-// TODO: Add support for phone factor
 // TODO: Move Forgot password option to the Password page

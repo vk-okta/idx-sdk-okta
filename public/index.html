@@ -125,10 +125,6 @@
           </div>
         </div>
 
-        <div id="send-email-section" class="form-section" style="display: none">
-          <label>Send an email to get the passcode</label>
-          <button id="mfa-submit" onclick="submitMfa(event)" class="btn primary">Submit</button>
-        </div>
         <div id="email-code-section" class="form-section" style="display: none">
           <div class="input-group">
             <label for="email-code">Enter the code:</label>
@@ -138,18 +134,6 @@
             <button onclick="submitMfa(event)" class="btn primary">Submit</button>
             <button onclick="resendMfa(event)" class="btn">Resend</button>
           </div>
-        </div>
-
-        <div id="send-sms-section" class="form-section" style="display: none">
-          <label>Send an sms to get the passcode</label>
-          <button id="mfa-submit" onclick="submitMfa(event)" class="btn primary">Submit</button>
-        </div>
-        <div id="sms-code-section" class="form-section" style="display: none">
-          <div class="input-group">
-            <label for="sms-code">Enter the code:</label>
-            <input name="sms-code" type="text" placeholder="Enter your code" />
-          </div>
-          <button id="mfa-submit" onclick="submitMfa(event)" class="btn primary">Submit</button>
         </div>
 
         <div id="password-section" class="form-section" style="display: none">
@@ -228,12 +212,6 @@
           <button id="mfa-submit" onclick="submitMfa(event)" class="btn primary">Submit</button>
         </div>
 
-        <div id="enroll-mfa-email-section" class="form-section" style="display: none">
-          <div class="input-group">
-            <label>Send an email to get the passcode</label>
-          </div>
-          <button id="mfa-submit" onclick="sendEmail(event)" class="btn primary">Send</button>
-        </div>
         <div id="enroll-mfa-email-code-section" class="form-section" style="display: none">
           <div class="input-group">
             <label for="enroll-email-code">Enter the code:</label>
