@@ -105,6 +105,8 @@ function renderApp() {
 
 function renderAuthenticatedState(authState) {
   hideSigninForm();
+  hideBackToHome();
+
   document.getElementById('auth-section').style.display = 'block';
   document.getElementById('accessToken').innerText = stringify(authState.accessToken);
 
@@ -212,6 +214,11 @@ function handleTransaction(transaction) {
       setTokens(transaction.tokens);
       updateAppState({ transaction });
       break;
+
+    case 'CANCELED':
+      cancelTransaction();
+      break;
+
     default:
       throw new Error('TODO: add handling for ' + transaction.status + ' status');
   }
@@ -292,6 +299,22 @@ async function renderTokens(accessToken, idToken) {
 
 function renderUserInfo(userInfo) {
   document.getElementById('userInfo').innerText = stringify(userInfo);
+}
+
+// ============================================ CANCEL TRANSACTION ==============================================
+function hideBackToHome() {
+  document.getElementById('back-to-home').style.display = 'none';
+}
+
+function backToHome() {
+  if (!authClient) return;
+
+  authClient.idx.cancel().then(handleTransaction).catch(showError);
+}
+
+function cancelTransaction() {
+  window.history.replaceState({}, '', '/');
+  window.location.reload();
 }
 
 function checkAvailableFeatures(transaction) {
@@ -1072,4 +1095,3 @@ function selectMfaFactorForUnlockAccount(e, authenticator) {
 // TODO: Add support for password recovery and unlock account with okta verify. currently only email support
 // TODO: Add support for phone factor
 // TODO: Move Forgot password option to the Password page
-// TODO: Add a home link that takes you to home page during login

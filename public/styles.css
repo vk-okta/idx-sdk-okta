@@ -166,7 +166,8 @@ button {
 
 #show-register-user,
 #show-forgot-password,
-#show-unlock-account {
+#show-unlock-account,
+#back-to-home {
   color: #4caf50;
   text-decoration: none;
   font-size: 0.875rem;
@@ -174,7 +175,8 @@ button {
 
 #show-register-user:hover,
 #show-forgot-password:hover,
-#show-unlock-account:hover {
+#show-unlock-account:hover,
+#back-to-home:hover {
   text-decoration: underline;
   cursor: pointer;
 }
