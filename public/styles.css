@@ -146,6 +146,13 @@ button {
   margin: 5px 0;
 }
 
+#rememberMe-section {
+  padding-top: 10px;
+  display: inline-flex;
+  align-items: center;
+  font-size: 14px;
+}
+
 #userInfo,
 #accessToken {
   background-color: #fff;
@@ -160,7 +167,7 @@ button {
 #register-user-section,
 #forgot-password-section,
 #unlock-account-user-section,
-#idp-button-section  {
+#idp-button-section {
   margin-top: 15px;
 }
 
@@ -175,7 +182,7 @@ button {
 
 #back-to-home {
   position: fixed;
-  top: 0;      
+  top: 0;
   left: 0;
   padding: 20px;
   margin: 10px;

@@ -146,10 +146,15 @@ function submitConfig() {
 
 function submitSignInUser() {
   const username = document.getElementById('username').value.trim();
+  const rememberMe = document.getElementById('rememberMe-checkbox').checked;
 
   updateAppState({ username });
 
-  authClient.idx.authenticate({ username }).then(handleTransaction).catch(showError);
+  if (rememberMe) {
+    authClient.idx.authenticate({ username, rememberMe }).then(handleTransaction).catch(showError);
+  } else {
+    authClient.idx.authenticate({ username }).then(handleTransaction).catch(showError);
+  }
 }
 
 function handleTransaction(transaction) {
@@ -163,7 +168,8 @@ function handleTransaction(transaction) {
         console.log('identify step found');
 
         showSignInFormSection;
-        checkAvailableFeatures(transaction); // check for available features
+        // check for available features
+        checkAvailableFeatures(transaction); 
 
         break;
       }
@@ -286,6 +292,10 @@ function checkAvailableFeatures(transaction) {
   const idpsList = transaction.availableSteps.filter((step) => step.name === 'redirect-idp');
   showAvailableIdps(idpsList);
 
+  const rememberMe = transaction.nextStep.inputs.filter((step) => step.name === 'rememberMe');
+  if (rememberMe.length) document.getElementById('rememberMe-section').style.display = 'block';
+
+  // features: unlock account and Register User
   const features = transaction.enabledFeatures;
   features.forEach((elem) => {
     // only show unlock-account if available based on the app / org policy configuration.
