@@ -1,10 +1,10 @@
 let authClient = {};
 var appState = {};
 var config = {
-  // issuer: 'https://vivek-giri.oktapreview.com/oauth2/ausae177jfbCM7LBp1d7',
-  // clientId: '0oaehju4utBnhFRvP1d7',
-  issuer: 'https://hiconlabs.oktapreview.com/oauth2/aus9oi7lq0TVc1h581d7',
-  clientId: '0oaddhr715zGZVMv81d7',
+  issuer: 'https://vivek-giri.oktapreview.com/oauth2/ausae177jfbCM7LBp1d7',
+  clientId: '0oaehju4utBnhFRvP1d7',
+  // issuer: 'https://hiconlabs.oktapreview.com/oauth2/aus9oi7lq0TVc1h581d7',
+  // clientId: '0oaddhr715zGZVMv81d7',
   scopes: ['openid', 'profile', 'offline_access'],
   redirectUri: 'http://localhost:3000/authorization-code/callback',
   useInteractionCodeFlow: true,
@@ -169,7 +169,7 @@ function handleTransaction(transaction) {
 
         showSignInFormSection;
         // check for available features
-        checkAvailableFeatures(transaction); 
+        checkAvailableFeatures(transaction);
 
         break;
       }
@@ -199,6 +199,8 @@ function setTokens(tokens) {
   // Replace state with the "/" so the page can be reloaded cleanly.
   // not doing this, will have issues when IDP sets interaction error in URL
   window.history.replaceState({}, '', '/');
+
+  if (!tokens) return;
 
   authClient.tokenManager.setTokens(tokens);
 
@@ -241,7 +243,7 @@ function capitalizeFirstWord(str) {
 
 function updateAppState(props) {
   Object.assign(appState, props);
-  document.getElementById('transaction-section').innerText = stringify(appState.transaction?.nextStep || appState.transaction || {});
+  document.getElementById('transaction-section').innerText = stringify(appState.transaction || {});
 }
 
 function hideSigninForm() {
@@ -570,10 +572,12 @@ function showMfaChallenge() {
   if (authenticator.type === 'email' || authenticator.type === 'phone') {
     // show the input to enter the passcode
     document.getElementById('email-code-section').style.display = 'block';
+    return;
   }
 
   if (authenticator.type === 'password') {
     document.getElementById('password-section').style.display = 'block';
+    return;
   }
 
   if (authenticator.type === 'security_question') {
@@ -582,12 +586,17 @@ function showMfaChallenge() {
     // display the question in the page
     const questionText = appState.transaction.nextStep.authenticator.profile.question;
     document.querySelector('#security-question-section .sec-ques').innerText = questionText;
+
+    return;
   }
 
   // OKTA-VERIFY
   if (authenticator.type === 'app') {
     document.getElementById('okta-verify-passcode-section').style.display = 'block';
+    return;
   }
+
+  throw new Error(`TODO: handle challenge-authenticator for authenticator type ${authenticator.type}`);
 }
 
 function showMfaEnrollPollForm() {
@@ -1106,5 +1115,10 @@ function selectMfaFactorForUnlockAccount(e, authenticator) {
   authClient.idx.proceed({ username: appState.username, authenticator }).then(handleTransaction).catch(showError);
 }
 
-// TODO: Add support for password recovery with okta verify. currently only email support
-// TODO: Move Forgot password option to the Password page
+
+/* 
+  1. Add KMSI support
+  2. Manage the condition where session already exists
+  3. Fastpass support
+  4. Add support for password recovery with okta verify. currently only email support
+*/
