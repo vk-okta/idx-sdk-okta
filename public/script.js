@@ -1117,7 +1117,6 @@ function selectMfaFactorForUnlockAccount(e, authenticator) {
 
 
 /* 
-  1. Add KMSI support
   2. Manage the condition where session already exists
   3. Fastpass support
   4. Add support for password recovery with okta verify. currently only email support
