@@ -489,6 +489,18 @@ function showAuthenticatorVerificationApp() {
 
 function showChallengePoll() {
   document.getElementById('challenge-poll-section').style.display = 'block';
+
+  const pollOptions = appState.transaction.nextStep?.poll;
+
+  if (pollOptions.required) {
+    authClient.idx
+      .poll({ refresh: 500 })
+      .then((transaction) => {
+        document.getElementById('challenge-poll-section').style.display = 'none';
+        handleTransaction(transaction);
+      })
+      .catch(showError);
+  }
 }
 
 function submitMfa() {
@@ -513,14 +525,6 @@ function submitMfa() {
 
   if (nextStep.name === 'enroll-poll') {
     return submitEnrollPoll();
-  }
-
-  if (nextStep.name === 'challenge-poll') {
-    return submitChallengePoll();
-  }
-
-  if (nextStep.name === 'reset-poll') {
-    return submitChallengePoll();
   }
 
   if (nextStep.name === 'reset-authenticator') {
@@ -559,16 +563,6 @@ function submitAuthenticatorVerificationDataApp() {
   const methodType = document.querySelector('#authenticator-verification-data-app-section select[name=methodType]').value;
 
   authClient.idx.authenticate({ methodType }).then(handleTransaction).catch(showError);
-}
-
-function submitChallengePoll() {
-  document.getElementById('challenge-poll-section').style.display = 'none';
-
-  const pollOptions = appState.transaction.nextStep?.poll;
-
-  if (pollOptions.required) {
-    authClient.idx.poll(pollOptions.refresh).then(handleTransaction).catch(showError);
-  }
 }
 
 // display the field to input the MFA
@@ -619,6 +613,17 @@ function showMfaEnrollPollForm() {
   const img = document.createElement('img');
   img.setAttribute('src', qrCode.href);
   imgFrame.appendChild(img);
+
+  const pollOptions = appState.transaction.nextStep?.poll;
+  if (pollOptions.required) {
+    authClient.idx
+      .poll({ refresh: 500 })
+      .then((transaction) => {
+        hideEnrollPoll();
+        handleTransaction(transaction);
+      })
+      .catch(showError);
+  }
 }
 
 function hideEnrollPoll() {
@@ -629,15 +634,6 @@ function hideEnrollPoll() {
   // remove the image frame
   const imgFrame = document.querySelector('#enroll-okta-verify-section .enroll-qrcode-image');
   imgFrame.innerHTML = '';
-}
-
-function submitEnrollPoll() {
-  hideEnrollPoll();
-
-  const pollOptions = appState.transaction.nextStep?.poll;
-  if (pollOptions.required) {
-    authClient.idx.poll(pollOptions.refresh).then(handleTransaction).catch(showError);
-  }
 }
 
 // ================================================= SUBMIT CHALLENGE AUTHENTICATOR =================================================
