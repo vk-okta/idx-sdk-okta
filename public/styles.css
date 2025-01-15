@@ -44,6 +44,10 @@ body {
   border: 1px solid #ddd;
 }
 
+.transaction-group {
+  max-height: 65%;
+}
+
 .form-section {
   background-color: white;
   border-radius: 8px;
