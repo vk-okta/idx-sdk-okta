@@ -44,6 +44,12 @@ function main() {
 
   createAuthClient();
 
+  // if the session is already present in some other tab. the interaction code is already
+  // present in the transaction. Just call the proceed method to get back tokens
+  if (authClient.idx.canProceed()) {
+    authClient.idx.proceed().then(handleTransaction).catch(showError);
+  }
+
   // Subscribe to authState change event. Logic based on authState is done here.
   authClient.authStateManager.subscribe(function (authState) {
     if (!authState.isAuthenticated) {
@@ -1115,9 +1121,8 @@ function selectMfaFactorForUnlockAccount(e, authenticator) {
   authClient.idx.proceed({ username: appState.username, authenticator }).then(handleTransaction).catch(showError);
 }
 
-
 /* 
-  2. Manage the condition where session already exists
-  3. Fastpass support
+  1. Post KMSI
+  2. Fastpass support
   4. Add support for password recovery with okta verify. currently only email support
 */
