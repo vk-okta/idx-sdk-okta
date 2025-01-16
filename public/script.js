@@ -590,6 +590,13 @@ function showMfaChallenge() {
     return;
   }
 
+  // Web AuthN
+  if (authenticator.type === 'security_key') {
+    document.getElementById('webauthn-section').style.display = 'block';
+    handleWebAuthn();
+    return;
+  }
+
   // OKTA-VERIFY
   if (authenticator.type === 'app') {
     document.getElementById('okta-verify-passcode-section').style.display = 'block';
@@ -634,6 +641,37 @@ function hideEnrollPoll() {
   // remove the image frame
   const imgFrame = document.querySelector('#enroll-okta-verify-section .enroll-qrcode-image');
   imgFrame.innerHTML = '';
+}
+
+async function handleWebAuthn() {
+  const challengeData = appState.transaction.nextStep?.authenticator?.contextualData?.challengeData;
+
+  const authEnrollments = appState.transaction.nextStep?.authenticatorEnrollments;
+  // extract type of webauthn from the enrollments
+  const authenticatorEnrollments = authEnrollments.filter((step) => step.type === 'security_key');
+
+  // this builds the parameter so that credentials can be requested
+  const options = OktaAuth.webauthn.buildCredentialRequestOptions(challengeData, authenticatorEnrollments);
+
+  // this is a web authentication API, this looks up stored creds and
+  // check the domain name to see if it matches the one used during enrollment
+  // if this is a match, prompt for user consent
+  // this returns binary formatted data
+  const credential = await navigator.credentials.get(options);
+
+  // this returns a string formatted object required to verify the user
+  // res contains {id, clientData, authenticatorData, signatureData}
+  const res = OktaAuth.webauthn.getAssertion(credential);
+
+  const { clientData, authenticatorData, signatureData } = res;
+
+  authClient.idx
+    .proceed({ clientData, authenticatorData, signatureData })
+    .then((transaction) => {
+      handleTransaction(transaction);
+      document.getElementById('webauthn-section').style.display = 'none';
+    })
+    .catch(showError);
 }
 
 // ================================================= SUBMIT CHALLENGE AUTHENTICATOR =================================================
@@ -773,6 +811,11 @@ function showMfaEnrollmentForm() {
     return showEnrollPassword();
   }
 
+  // web authn
+  if (authenticator.type === 'security_key') {
+    return showEnrollWebAuthn();
+  }
+
   throw new Error(`TODO: handle enroll showMfaEnrollmentForm for authenticator type ${authenticator.type}`);
 }
 
@@ -893,6 +936,37 @@ function submitAuthenticatorEnrollmentData() {
   hideAuthEnrollList();
 
   authClient.idx.proceed({ methodType, phoneNumber }).then(handleTransaction).catch(showError);
+}
+
+async function showEnrollWebAuthn() {
+  document.getElementById('enroll-webauthn-section').style.display = 'block';
+
+  const activationData = appState.transaction.nextStep?.authenticator?.contextualData?.activationData;
+
+  const authenticatorEnrollments = appState.transaction.nextStep?.authenticatorEnrollments;
+
+  // this builds the parameter needed to create new credential
+  const options = OktaAuth.webauthn.buildCredentialCreationOptions(activationData, authenticatorEnrollments);
+
+  // browser prompts the user to choose an authenticator
+  const credential = await navigator.credentials.create(options);
+
+  // after the user chooses the authenticator, ask for consent to create creds.
+  // The private and public key pairs are created.
+  // The private key is stored internally on the device and linked to the user and domain name.
+
+  // convert to string before sending it to Okta servers
+  const res = OktaAuth.webauthn.getAttestation(credential);
+
+  const { clientData, attestation } = res;
+
+  authClient.idx
+    .proceed({ clientData, attestation })
+    .then((transaction) => {
+      handleTransaction(transaction);
+      document.getElementById('enroll-webauthn-section').style.display = 'none';
+    })
+    .catch(showError);
 }
 
 // ======================================================== MFA REQUIRED ========================================================
@@ -1122,3 +1196,5 @@ function selectMfaFactorForUnlockAccount(e, authenticator) {
   2. Fastpass support
   4. Add support for password recovery with okta verify. currently only email support
 */
+
+// local-ssl-proxy --source 3001 --target 3000

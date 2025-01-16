@@ -159,6 +159,15 @@
           <button id="mfa-submit" onclick="submitMfa(event)" class="btn primary">Submit</button>
         </div>
 
+        <div id="webauthn-section" class="form-section" style="display: none">
+          <label>Verify with Security Key or Biometric Authenticator</label>
+          <p>
+            You will be prompted to use a security key or biometric verification. <br />
+            Follow the instructions to complete verification
+          </p>
+          <button onclick="handleWebAuthn()" class="btn primary">Retry</button>
+        </div>
+
         <div id="authenticator-verification-data-app-section" class="form-section" style="display: none">
           <label for="methodType">Select a method type:</label>
           <select name="methodType">
@@ -258,6 +267,15 @@
               <!-- image is appended dynamically-->
             </div>
           </div>
+        </div>
+
+        <div id="enroll-webauthn-section" class="form-section" style="display: none">
+          <label>Enroll in Security Key or Biometric Authenticator</label>
+          <p>
+            You will be prompted to use a security key or biometric verification. <br />
+            Follow the instructions to complete verification
+          </p>
+          <button onclick="handleWebAuthn()" class="btn primary">Retry</button>
         </div>
 
         <div id="reset-authenticator-section" class="form-section" style="display: none">
