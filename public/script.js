@@ -44,12 +44,6 @@ function main() {
 
   createAuthClient();
 
-  // if the session is already present in some other tab. the interaction code is already
-  // present in the transaction. Just call the proceed method to get back tokens
-  if (authClient.idx.canProceed()) {
-    authClient.idx.proceed().then(handleTransaction).catch(showError);
-  }
-
   // Subscribe to authState change event. Logic based on authState is done here.
   authClient.authStateManager.subscribe(function (authState) {
     if (!authState.isAuthenticated) {
@@ -187,7 +181,7 @@ function handleTransaction(transaction) {
 
     case 'SUCCESS':
       hideSigninForm();
-      setTokens(transaction.tokens);
+      handleTokens(transaction);
       updateAppState({ transaction });
       break;
 
@@ -197,6 +191,17 @@ function handleTransaction(transaction) {
 
     default:
       throw new Error('TODO: add handling for ' + transaction.status + ' status');
+  }
+}
+
+function handleTokens(transaction) {
+  if (transaction.tokens) {
+    // when status is SUCCESS, transaction object has tokens in it
+    setTokens(transaction.tokens);
+  } else {
+    // if the session exists, the status is SUCCESS but the transaction object
+    // doesn't have tokens in it. Call proceed to get tokens
+    authClient.idx.proceed().then(handleTransaction).catch(showError);
   }
 }
 
