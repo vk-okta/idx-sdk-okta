@@ -1197,9 +1197,11 @@ function selectMfaFactorForUnlockAccount(e, authenticator) {
 }
 
 /* 
-  1. Post KMSI
+  1. Post KMSI - don't think it is supported 
   2. Fastpass support
-  4. Add support for password recovery with okta verify. currently only email support
+  3. Add support for password recovery with okta verify.
+  4. Keep entering wrong password and you can't unlock account in the same flow
 */
 
 // local-ssl-proxy --source 3001 --target 3000
+ 
