@@ -144,17 +144,16 @@ function submitConfig() {
   createAuthClient();
 }
 
-function submitSignInUser() {
+async function submitSignInUser() {
   const username = document.getElementById('username').value.trim();
   const rememberMe = document.getElementById('rememberMe-checkbox').checked;
 
   updateAppState({ username });
 
-  if (rememberMe) {
-    authClient.idx.authenticate({ username, rememberMe }).then(handleTransaction).catch(showError);
-  } else {
-    authClient.idx.authenticate({ username }).then(handleTransaction).catch(showError);
-  }
+  authClient.idx
+    .authenticate(rememberMe ? { username, rememberMe } : { username })
+    .then(handleTransaction)
+    .catch(showError);
 }
 
 function handleTransaction(transaction) {
@@ -875,7 +874,7 @@ function submitEnrollChallengeQuestion() {
   const answer = document.querySelector('#enroll-mfa-question-section input[name=enroll-answer]').value;
   const questionKey = document.querySelector('#enroll-mfa-question-section select[name=enroll-questions]').value;
 
-  authClient.idx.authenticate({ credentials: { questionKey, answer } }).then(handleTransaction).catch(showError);
+  authClient.idx.proceed({ credentials: { questionKey, answer } }).then(handleTransaction).catch(showError);
 }
 
 function submitEnrollChallengeEmail() {
