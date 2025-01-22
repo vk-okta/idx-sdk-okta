@@ -5,7 +5,7 @@ var config = {
   clientId: '0oaehju4utBnhFRvP1d7',
   // issuer: 'https://hiconlabs.oktapreview.com/oauth2/aus9oi7lq0TVc1h581d7',
   // clientId: '0oaddhr715zGZVMv81d7',
-  scopes: ['openid', 'profile', 'offline_access'],
+  scopes: ['openid', 'profile', 'offline_access', 'okta.myAccount.password.manage', 'okta.myAccount.password.read'],
   redirectUri: 'http://localhost:3000/authorization-code/callback',
   useInteractionCodeFlow: true,
   transformAuthState,
@@ -45,13 +45,13 @@ function main() {
   createAuthClient();
 
   // Subscribe to authState change event. Logic based on authState is done here.
-  authClient.authStateManager.subscribe(function (authState) {
+  authClient.authStateManager.subscribe(async function (authState) {
     if (!authState.isAuthenticated) {
       // this I am setting here becuase putting idx.start in startApp() function
       // is starting the flow on page refresh causing errors
 
       // using this to check available idps and enabled features
-      authClient.idx.start().then(handleTransaction).catch(showError);
+      await authClient.idx.start().then(handleTransaction).catch(showError);
 
       renderUnAuthenticatedState();
     }
@@ -1204,4 +1204,15 @@ function selectMfaFactorForUnlockAccount(e, authenticator) {
 */
 
 // local-ssl-proxy --source 3001 --target 3000
- 
+
+/*
+
+authClient.myAccount.updatePassword({
+  payload: {
+    profile: {
+      password: '<your_new_password>'
+    }
+  }
+})
+
+*/
