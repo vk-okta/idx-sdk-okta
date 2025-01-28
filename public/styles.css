@@ -171,14 +171,16 @@ button {
 #register-user-section,
 #forgot-password-section,
 #unlock-account-user-section,
-#idp-button-section {
+#idp-button-section,
+#back-to-mfa-list-section {
   margin-top: 15px;
 }
 
 #show-register-user,
 #show-forgot-password,
 #show-unlock-account,
-#back-to-home {
+#back-to-home,
+#back-to-mfa-list {
   color: #4caf50;
   text-decoration: none;
   font-size: 0.875rem;
@@ -196,6 +198,7 @@ button {
 #show-forgot-password:hover,
 #show-unlock-account:hover,
 #back-to-home:hover,
+#back-to-mfa-list:hover,
 .idp-button:hover {
   text-decoration: underline;
   cursor: pointer;

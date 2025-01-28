@@ -138,6 +138,9 @@
             <input type="password" id="password" name="password" placeholder="Enter your password" />
           </div>
           <button id="mfa-submit" onclick="submitMfa(event)" class="btn primary">Submit</button>
+          <div id="back-to-mfa-list-section">
+            <a id="back-to-mfa-list" onClick="backToMfaList(event)">Verify with something else</a>
+          </div>
         </div>
 
         <div id="security-question-section" class="form-section" style="display: none">
@@ -149,6 +152,9 @@
             <input name="sec-ques-ans" type="text" autocomplete="off" /><br />
           </div>
           <button id="mfa-submit" onclick="submitMfa(event)" class="btn primary">Submit</button>
+          <div id="back-to-mfa-list-section">
+            <a id="back-to-mfa-list" onClick="backToMfaList(event)">Verify with something else</a>
+          </div>
         </div>
 
         <div id="okta-verify-passcode-section" class="form-section" style="display: none">
@@ -166,6 +172,9 @@
             Follow the instructions to complete verification
           </p>
           <button onclick="handleWebAuthn()" class="btn primary">Retry</button>
+          <div id="back-to-mfa-list-section">
+            <a id="back-to-mfa-list" onClick="backToMfaList(event)">Verify with something else</a>
+          </div>
         </div>
 
         <div id="authenticator-verification-data-app-section" class="form-section" style="display: none">
@@ -174,6 +183,9 @@
             <!-- methodTypes are dynamically inserted here -->
           </select>
           <button id="mfa-submit" onclick="submitMfa(event)" class="btn primary">Submit</button>
+          <div id="back-to-mfa-list-section">
+            <a id="back-to-mfa-list" onClick="backToMfaList(event)">Verify with something else</a>
+          </div>
         </div>
 
         <div id="authenticator-verification-data-email-section" class="form-section" style="display: none">
@@ -182,6 +194,9 @@
             <!-- methodTypes are dynamically inserted here -->
           </select>
           <button id="mfa-submit" onclick="submitMfa(event)" class="btn primary">Submit</button>
+          <div id="back-to-mfa-list-section">
+            <a id="back-to-mfa-list" onClick="backToMfaList(event)">Verify with something else</a>
+          </div>
         </div>
 
         <div id="challenge-poll-section" class="form-section" style="display: none">

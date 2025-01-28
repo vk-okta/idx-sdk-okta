@@ -448,6 +448,26 @@ function handleEmailCallback() {
   }
 }
 
+// ======================================================= SHOW MFA =======================================================
+
+function backToMfaList(event) {
+  document.getElementById('authenticator-verification-data-email-section').style.display = 'none';
+  document.getElementById('authenticator-verification-data-app-section').style.display = 'none';
+  document.getElementById('password-section').style.display = 'none';
+  document.getElementById('webauthn-section').style.display = 'none';
+  document.getElementById('security-question-section').style.display = 'none';
+
+
+  const selectAuthenticatorStep = appState.transaction.availableSteps.filter((step) => step.name === 'select-authenticator-authenticate');
+
+  // const reqMFA = selectAuthenticatorStep[0].inputs[0].options;
+
+  // TODO: show back to mfa list only if there are multiple MFAs, if there is just one factor type
+  // it won't make sense to have back to mfa list if there is one 1 factor type 
+
+  authClient.idx.proceed({ step: selectAuthenticatorStep[0].name }).then(handleTransaction).catch(showError);
+}
+
 function showAuthenticatorVerificationData() {
   const authenticator = appState.transaction.nextStep.authenticator;
 
