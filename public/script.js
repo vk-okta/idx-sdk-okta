@@ -1200,6 +1200,7 @@ function selectMfaFactorForUnlockAccount(e, authenticator) {
   2. Fastpass support
   3. Add support for password recovery with okta verify.
   4. Keep entering wrong password and you can't unlock account in the same flow
+  5. Back to MFA flow
 */
 
 // local-ssl-proxy --source 3001 --target 3000
