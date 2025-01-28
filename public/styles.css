@@ -195,13 +195,14 @@ button {
 #show-register-user:hover,
 #show-forgot-password:hover,
 #show-unlock-account:hover,
-#back-to-home:hover {
+#back-to-home:hover,
+.idp-button:hover {
   text-decoration: underline;
   cursor: pointer;
 }
 
 .idp-button {
-  color: #4caf50;
+  color: #0d833e;
   font-size: 0.875rem;
   text-decoration: none;
   display: inline-block;

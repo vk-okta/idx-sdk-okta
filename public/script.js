@@ -5,7 +5,7 @@ var config = {
   clientId: '0oaehju4utBnhFRvP1d7',
   // issuer: 'https://hiconlabs.oktapreview.com/oauth2/aus9oi7lq0TVc1h581d7',
   // clientId: '0oaddhr715zGZVMv81d7',
-  scopes: ['openid', 'profile', 'offline_access'],
+  scopes: ['openid', 'profile', 'offline_access', 'okta.myAccount.password.manage', 'okta.myAccount.password.read'],
   redirectUri: 'http://localhost:3000/authorization-code/callback',
   useInteractionCodeFlow: true,
   transformAuthState,
@@ -44,20 +44,14 @@ function main() {
 
   createAuthClient();
 
-  // if the session is already present in some other tab. the interaction code is already
-  // present in the transaction. Just call the proceed method to get back tokens
-  if (authClient.idx.canProceed()) {
-    authClient.idx.proceed().then(handleTransaction).catch(showError);
-  }
-
   // Subscribe to authState change event. Logic based on authState is done here.
-  authClient.authStateManager.subscribe(function (authState) {
+  authClient.authStateManager.subscribe(async function (authState) {
     if (!authState.isAuthenticated) {
       // this I am setting here becuase putting idx.start in startApp() function
       // is starting the flow on page refresh causing errors
 
       // using this to check available idps and enabled features
-      authClient.idx.start().then(handleTransaction).catch(showError);
+      await authClient.idx.start().then(handleTransaction).catch(showError);
 
       renderUnAuthenticatedState();
     }
@@ -150,17 +144,16 @@ function submitConfig() {
   createAuthClient();
 }
 
-function submitSignInUser() {
+async function submitSignInUser() {
   const username = document.getElementById('username').value.trim();
   const rememberMe = document.getElementById('rememberMe-checkbox').checked;
 
   updateAppState({ username });
 
-  if (rememberMe) {
-    authClient.idx.authenticate({ username, rememberMe }).then(handleTransaction).catch(showError);
-  } else {
-    authClient.idx.authenticate({ username }).then(handleTransaction).catch(showError);
-  }
+  authClient.idx
+    .authenticate(rememberMe ? { username, rememberMe } : { username })
+    .then(handleTransaction)
+    .catch(showError);
 }
 
 function handleTransaction(transaction) {
@@ -187,7 +180,7 @@ function handleTransaction(transaction) {
 
     case 'SUCCESS':
       hideSigninForm();
-      setTokens(transaction.tokens);
+      handleTokens(transaction);
       updateAppState({ transaction });
       break;
 
@@ -197,6 +190,17 @@ function handleTransaction(transaction) {
 
     default:
       throw new Error('TODO: add handling for ' + transaction.status + ' status');
+  }
+}
+
+function handleTokens(transaction) {
+  if (transaction.tokens) {
+    // when status is SUCCESS, transaction object has tokens in it
+    setTokens(transaction.tokens);
+  } else {
+    // if the session exists, the status is SUCCESS but the transaction object
+    // doesn't have tokens in it. Call proceed to get tokens
+    authClient.idx.proceed().then(handleTransaction).catch(showError);
   }
 }
 
@@ -870,7 +874,7 @@ function submitEnrollChallengeQuestion() {
   const answer = document.querySelector('#enroll-mfa-question-section input[name=enroll-answer]').value;
   const questionKey = document.querySelector('#enroll-mfa-question-section select[name=enroll-questions]').value;
 
-  authClient.idx.authenticate({ credentials: { questionKey, answer } }).then(handleTransaction).catch(showError);
+  authClient.idx.proceed({ credentials: { questionKey, answer } }).then(handleTransaction).catch(showError);
 }
 
 function submitEnrollChallengeEmail() {
@@ -1192,9 +1196,23 @@ function selectMfaFactorForUnlockAccount(e, authenticator) {
 }
 
 /* 
-  1. Post KMSI
+  1. Post KMSI - don't think it is supported 
   2. Fastpass support
-  4. Add support for password recovery with okta verify. currently only email support
+  3. Add support for password recovery with okta verify.
+  4. Keep entering wrong password and you can't unlock account in the same flow
+  5. Back to MFA flow
 */
 
 // local-ssl-proxy --source 3001 --target 3000
+
+/*
+
+authClient.myAccount.updatePassword({
+  payload: {
+    profile: {
+      password: '<your_new_password>'
+    }
+  }
+})
+
+*/
