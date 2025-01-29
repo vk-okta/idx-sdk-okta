@@ -457,13 +457,12 @@ function backToMfaList(event) {
   document.getElementById('webauthn-section').style.display = 'none';
   document.getElementById('security-question-section').style.display = 'none';
 
-
   const selectAuthenticatorStep = appState.transaction.availableSteps.filter((step) => step.name === 'select-authenticator-authenticate');
 
   // const reqMFA = selectAuthenticatorStep[0].inputs[0].options;
 
   // TODO: show back to mfa list only if there are multiple MFAs, if there is just one factor type
-  // it won't make sense to have back to mfa list if there is one 1 factor type 
+  // it won't make sense to have back to mfa list if there is one 1 factor type
 
   authClient.idx.proceed({ step: selectAuthenticatorStep[0].name }).then(handleTransaction).catch(showError);
 }
@@ -1215,24 +1214,29 @@ function selectMfaFactorForUnlockAccount(e, authenticator) {
   authClient.idx.proceed({ username: appState.username, authenticator }).then(handleTransaction).catch(showError);
 }
 
+// ============================================= CHANGE PASSWORD =============================================
+function submitNewPass(event) {
+  const newPassword = document.querySelector('#change-password-section input[name=change-password]').value;
+
+  authClient.myaccount
+    .updatePassword({
+      payload: {
+        profile: {
+          password: newPassword,
+        },
+      },
+    })
+    .then(() => {
+      console.log('Password changed successfully!!');
+    })
+    .catch(showError);
+}
+
 /* 
   1. Post KMSI - don't think it is supported 
   2. Fastpass support
   3. Add support for password recovery with okta verify.
   4. Keep entering wrong password and you can't unlock account in the same flow
-  5. Back to MFA flow
 */
 
 // local-ssl-proxy --source 3001 --target 3000
-
-/*
-
-authClient.myAccount.updatePassword({
-  payload: {
-    profile: {
-      password: '<your_new_password>'
-    }
-  }
-})
-
-*/
