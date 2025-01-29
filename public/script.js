@@ -526,6 +526,8 @@ function showChallengePoll() {
   }
 }
 
+// ============================================= SUBMIT MFA =============================================
+
 function submitMfa() {
   const nextStep = appState.transaction.nextStep;
 
@@ -1219,13 +1221,7 @@ function submitNewPass(event) {
   const newPassword = document.querySelector('#change-password-section input[name=change-password]').value;
 
   authClient.myaccount
-    .updatePassword({
-      payload: {
-        profile: {
-          password: newPassword,
-        },
-      },
-    })
+    .updatePassword({ payload: { profile: { password: newPassword } } })
     .then(() => {
       console.log('Password changed successfully!!');
     })
@@ -1238,5 +1234,3 @@ function submitNewPass(event) {
   3. Add support for password recovery with okta verify.
   4. Keep entering wrong password and you can't unlock account in the same flow
 */
-
-// local-ssl-proxy --source 3001 --target 3000
