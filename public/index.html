@@ -157,9 +157,10 @@
           </div>
         </div>
 
+        <!-- Used both for Okta-Verify and Google-Authenticator app -->
         <div id="okta-verify-passcode-section" class="form-section" style="display: none">
           <div class="input-group">
-            <label for="okta-verify-passcode">Enter the code from the Okta Verify app:</label>
+            <label id="app-authenticator-label" for="okta-verify-passcode">Enter the code from the Okta Verify app</label>
             <input name="okta-verify-passcode" type="text" autocomplete="off" />
           </div>
           <button id="mfa-submit" onclick="submitMfa(event)" class="btn primary">Submit</button>
@@ -249,7 +250,7 @@
 
         <div id="enroll-mfa-email-code-section" class="form-section" style="display: none">
           <div class="input-group">
-            <label for="enroll-email-code">Enter the code:</label>
+            <label for="enroll-email-code">Enter the code sent to your email:</label>
             <input name="enroll-email-code" type="text" placeholder="Enter your code" />
           </div>
           <div class="form-button-section">
@@ -293,6 +294,24 @@
           <button onclick="handleWebAuthn()" class="btn primary">Retry</button>
         </div>
 
+        <div id="enroll-app-section" class="form-section" style="display: none">
+          <div class="input-group">
+            <label for="enroll-qrcode-image">Open the Google Authenticator App and scan this QR code</label>
+            <div name="enroll-qrcode-image" class="enroll-qrcode-image">
+              <!-- image is appended dynamically-->
+            </div>
+
+            <label style="display: block;">OR</label>
+            <p style="display: inline-block;">Use this Key to enroll - </p>
+            <label style="display: inline-block" class="enroll-google-app-key"></label>
+
+            <label for="enroll-app-code">Enter the code from the App:</label>
+            <input name="enroll-app-code" type="text" placeholder="Enter your code" />
+
+            <button id="mfa-submit" onclick="submitMfa(event)" class="btn primary">Submit</button>
+          </div>
+        </div>
+
         <div id="reset-authenticator-section" class="form-section" style="display: none">
           <label class="heading">Reset Your Password</label>
 
@@ -330,6 +349,14 @@
           <div class="auth-info">
             <div class="info-title">Access Token</div>
             <div id="accessToken"></div>
+          </div>
+          <div class="info-title">Change Password</div>
+          <div id="change-password-section">
+            <div class="input-group">
+              <label for="change-password">Enter your New Password</label>
+              <input type="text" name="change-password" />
+            </div>
+            <button id="logout" style="background-color: #18b332" onclick="submitNewPass(event)">Submit</button>
           </div>
         </div>
       </div>

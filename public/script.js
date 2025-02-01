@@ -457,13 +457,12 @@ function backToMfaList(event) {
   document.getElementById('webauthn-section').style.display = 'none';
   document.getElementById('security-question-section').style.display = 'none';
 
-
   const selectAuthenticatorStep = appState.transaction.availableSteps.filter((step) => step.name === 'select-authenticator-authenticate');
 
   // const reqMFA = selectAuthenticatorStep[0].inputs[0].options;
 
   // TODO: show back to mfa list only if there are multiple MFAs, if there is just one factor type
-  // it won't make sense to have back to mfa list if there is one 1 factor type 
+  // it won't make sense to have back to mfa list if there is one 1 factor type
 
   authClient.idx.proceed({ step: selectAuthenticatorStep[0].name }).then(handleTransaction).catch(showError);
 }
@@ -526,6 +525,8 @@ function showChallengePoll() {
       .catch(showError);
   }
 }
+
+// ============================================= SUBMIT MFA =============================================
 
 function submitMfa() {
   const nextStep = appState.transaction.nextStep;
@@ -621,8 +622,12 @@ function showMfaChallenge() {
     return;
   }
 
-  // OKTA-VERIFY
+  // Okta-Verify Or Google-Authenticator
   if (authenticator.type === 'app') {
+    const authenticatorName = authenticator.displayName;
+
+    document.getElementById('app-authenticator-label').textContent = `Enter the code from the ${authenticatorName} app`;
+
     document.getElementById('okta-verify-passcode-section').style.display = 'block';
     return;
   }
@@ -840,6 +845,10 @@ function showMfaEnrollmentForm() {
     return showEnrollWebAuthn();
   }
 
+  if (authenticator.type === 'app') {
+    return showEnrollApp();
+  }
+
   throw new Error(`TODO: handle enroll showMfaEnrollmentForm for authenticator type ${authenticator.type}`);
 }
 
@@ -860,6 +869,40 @@ function showEnrollSecurityQuestion(authenticator) {
 
 function showEnrollEmail() {
   document.getElementById('enroll-mfa-email-code-section').style.display = 'block';
+}
+
+function showEnrollApp() {
+  const authenticator = appState.transaction.nextStep.authenticator;
+  // extract QR code data
+  const qrCode = authenticator.contextualData.qrcode;
+  const sharedSecret = authenticator.contextualData.sharedSecret;
+
+  const containerElem = document.getElementById('enroll-app-section');
+  containerElem.style.display = 'block';
+
+  const keyLabel = document.querySelector('#enroll-app-section .enroll-google-app-key');
+  keyLabel.textContent = sharedSecret;
+
+  const imgFrame = document.querySelector('#enroll-app-section .enroll-qrcode-image');
+  imgFrame.innerHTML = '';
+
+  const img = document.createElement('img');
+  img.setAttribute('src', qrCode.href);
+  imgFrame.appendChild(img);
+}
+
+function hideEnrollApp() {
+  // hide the enroll card
+  const containerElem = document.getElementById('enroll-app-section');
+  containerElem.style.display = 'none';
+
+  // remove the image frame
+  const imgFrame = document.querySelector('#enroll-app-section .enroll-qrcode-image');
+  imgFrame.innerHTML = '';
+
+  // remove key
+  const keyLabel = document.querySelector('#enroll-app-section .enroll-google-app-key');
+  keyLabel.textContent = '';
 }
 
 function showEnrollPassword() {
@@ -883,6 +926,10 @@ function submitEnrollAuthenticator() {
 
   if (authenticator.type === 'password') {
     return submitEnrollChallengePassword();
+  }
+
+  if (authenticator.type === 'app') {
+    return submitEnrollChallengeApp();
   }
 
   throw new Error(`TODO: handle submit enrollment submitEnrollAuthenticator for authenticator type ${authenticator.type}`);
@@ -917,6 +964,15 @@ function submitEnrollChallengePassword() {
   document.getElementById('enroll-mfa-password-section').style.display = 'none';
 
   authClient.idx.proceed({ password: newPass }).then(handleTransaction).catch(showError);
+}
+
+function submitEnrollChallengeApp() {
+  document.getElementById('enroll-app-section').style.display = 'none';
+  hideEnrollApp();
+
+  const passCode = document.querySelector('#enroll-app-section input[name=enroll-app-code]').value;
+
+  authClient.idx.proceed({ verificationCode: passCode }).then(handleTransaction).catch(showError);
 }
 
 function showAuthenticatorEnrollmentData() {
@@ -1215,24 +1271,15 @@ function selectMfaFactorForUnlockAccount(e, authenticator) {
   authClient.idx.proceed({ username: appState.username, authenticator }).then(handleTransaction).catch(showError);
 }
 
-/* 
-  1. Post KMSI - don't think it is supported 
-  2. Fastpass support
-  3. Add support for password recovery with okta verify.
-  4. Keep entering wrong password and you can't unlock account in the same flow
-  5. Back to MFA flow
-*/
+// ============================================= CHANGE PASSWORD =============================================
+function submitNewPass(event) {
+  const newPassword = document.querySelector('#change-password-section input[name=change-password]').value;
 
-// local-ssl-proxy --source 3001 --target 3000
+  authClient.myaccount
+    .updatePassword({ payload: { profile: { password: newPassword } } })
+    .then(() => {
+      console.log('Password changed successfully!!');
+    })
+    .catch(showError);
+}
 
-/*
-
-authClient.myAccount.updatePassword({
-  payload: {
-    profile: {
-      password: '<your_new_password>'
-    }
-  }
-})
-
-*/
