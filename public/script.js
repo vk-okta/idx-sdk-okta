@@ -117,16 +117,6 @@ function renderAuthenticatedState(authState) {
 }
 
 function renderUnAuthenticatedState() {
-  const url = new URL(window.location.href);
-  const params = new URLSearchParams(url.search);
-
-  // if the URL has 'iss' parameter then that means, the flow is
-  // being initiated by chicklet on Okta Dashboard
-  if (params.has('iss')) {
-    console.log("The url has iss parameter, session exists! Not showing sign in page.")
-    return;
-  }
-
   document.getElementById('auth-section').style.display = 'none';
   showSignInFormSection();
 }
