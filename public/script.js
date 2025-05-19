@@ -5,8 +5,9 @@ var config = {
   clientId: '0oaehju4utBnhFRvP1d7',
   // issuer: 'https://hiconlabs.oktapreview.com/oauth2/aus9oi7lq0TVc1h581d7',
   // clientId: '0oaddhr715zGZVMv81d7',
+  // redirectUri: 'http://localhost:3000/authorization-code/callback',
   scopes: ['openid', 'profile', 'offline_access', 'okta.myAccount.password.manage', 'okta.myAccount.password.read'],
-  redirectUri: 'http://localhost:3000/authorization-code/callback',
+  redirectUri: 'https://idx-sdk-okta.onrender.com/authorization-code/callback',
   useInteractionCodeFlow: true,
   transformAuthState,
 };
