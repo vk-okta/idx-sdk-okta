@@ -456,6 +456,7 @@ function backToMfaList(event) {
   document.getElementById('password-section').style.display = 'none';
   document.getElementById('webauthn-section').style.display = 'none';
   document.getElementById('security-question-section').style.display = 'none';
+  document.getElementById('okta-verify-passcode-section').style.display = 'none';
 
   const selectAuthenticatorStep = appState.transaction.availableSteps.filter((step) => step.name === 'select-authenticator-authenticate');
 
@@ -487,6 +488,7 @@ function showAuthenticatorVerificationDataEmailAndPhone() {
   const options = appState.transaction.nextStep.inputs[0].options;
 
   const selectElem = document.querySelector('#authenticator-verification-data-email-section select[name=methodType]');
+  selectElem.innerHTML = '';
 
   options.forEach(function (option) {
     const el = document.createElement('option');
@@ -501,6 +503,7 @@ function showAuthenticatorVerificationApp() {
 
   const options = appState.transaction.nextStep.inputs[0].options;
   const selectElem = document.querySelector('#authenticator-verification-data-app-section select[name=methodType]');
+  selectElem.innerHTML = '';
 
   options.forEach(function (option) {
     const el = document.createElement('option');
@@ -1282,4 +1285,3 @@ function submitNewPass(event) {
     })
     .catch(showError);
 }
-

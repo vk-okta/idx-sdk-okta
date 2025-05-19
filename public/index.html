@@ -164,6 +164,10 @@
             <input name="okta-verify-passcode" type="text" autocomplete="off" />
           </div>
           <button id="mfa-submit" onclick="submitMfa(event)" class="btn primary">Submit</button>
+          <div id="back-to-mfa-list-section">
+            <!-- TODO: solve the okta verify back to MFA list issue before adding this -->
+            <!-- <a id="back-to-mfa-list" onClick="backToMfaList(event)">Verify with something else</a> -->
+          </div>
         </div>
 
         <div id="webauthn-section" class="form-section" style="display: none">
