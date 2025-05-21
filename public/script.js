@@ -54,7 +54,7 @@ function main() {
       // using this to check available idps and enabled features
       await authClient.idx.start().then(handleTransaction).catch(showError);
 
-      renderUnAuthenticatedState();
+      // renderUnAuthenticatedState();
     }
 
     // Render app based on the new authState
